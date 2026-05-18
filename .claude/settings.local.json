@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dart analyze *)",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.13-bin\" -Recurse | Select-Object -First 10 Name)",
+      "Bash(del \"c:\\\\Users\\\\Adeyemi\\\\StudioProjects\\\\vente_achat\\\\lib\\\\features\\\\vente_achat\\\\core\\\\va_nav.dart\")"
+    ]
+  }
+}
