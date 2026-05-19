@@ -2,9 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/va_theme.dart';
-import '../../../domain/export.dart';
-import '../vendeur/annonce_publiee_screen.dart';
 import '../vendeur/creation_widgets.dart';
+import '../vendeur/justificatif_screen.dart';
 
 @RoutePage()
 class VendreFormScreen extends StatefulWidget {
@@ -60,11 +59,11 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Barre de progression ─────────────────────────────────────
-            CreationStepBar(current: 2, total: 4),
+            CreationStepBar(current: 2, total: 3),
             const SizedBox(height: 20),
 
             // ── Étape label ──────────────────────────────────────────────
-            const Text('ÉTAPE 2 SUR 4',
+            const Text('ÉTAPE 2 SUR 3',
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -182,9 +181,7 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
       bottomNavigationBar: CreationBottomBar(
         onBack: () => Navigator.of(context).pop(),
         onNext: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => AnnoncePubileeScreen(annonce: AnnoncesMock.iphone13),
-          ),
+          MaterialPageRoute(builder: (_) => const JustificatifScreen()),
         ),
       ),
     );

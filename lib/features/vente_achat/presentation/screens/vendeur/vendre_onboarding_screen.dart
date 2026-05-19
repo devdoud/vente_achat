@@ -32,14 +32,13 @@ class VendreOnboardingScreen extends StatefulWidget {
 
 class _VendreOnboardingState extends State<VendreOnboardingScreen> {
   final _ctrl = PageController();
-  int _page       = 0;
-  int _vendeurType = -1;
+  int _page = 0;
   final Set<AnnonceCategorie> _selCats = {};
 
   // ── Navigation ─────────────────────────────────────────────────────────
 
   void _next() {
-    if (_page < 3) {
+    if (_page < 2) {
       _ctrl.nextPage(
           duration: const Duration(milliseconds: 380), curve: Curves.easeInOutCubic);
     } else {
@@ -76,18 +75,9 @@ class _VendreOnboardingState extends State<VendreOnboardingScreen> {
         onPageChanged: (i) => setState(() => _page = i),
         children: [
           _StepWelcome(onStart: _next, onSkip: _finish),
-          _StepType(
-            page: 1,
-            total: 3,
-            selected: _vendeurType,
-            onSelect: (t) => setState(() => _vendeurType = t),
-            onBack: _back,
-            onNext: _next,
-            onClose: _finish,
-          ),
           _StepCategories(
-            page: 2,
-            total: 3,
+            page: 1,
+            total: 2,
             selected: _selCats,
             onToggle: (c) => setState(() {
               if (_selCats.contains(c)) _selCats.remove(c);
@@ -306,145 +296,7 @@ class _StatPill extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  ÉTAPE 1 — PROFIL VENDEUR
-// ═══════════════════════════════════════════════════════════════════════════
-
-class _StepType extends StatelessWidget {
-  final int page, total, selected;
-  final ValueChanged<int> onSelect;
-  final VoidCallback onBack, onNext, onClose;
-
-  const _StepType({
-    required this.page, required this.total, required this.selected,
-    required this.onSelect, required this.onBack, required this.onNext, required this.onClose,
-  });
-
-  static const _types = [
-    (emoji: '🏠', title: 'Particulier',       sub: 'Je vends mes affaires personnelles'),
-    (emoji: '🏪', title: 'Marchand',           sub: "J'ai une boutique ou une activité"),
-    (emoji: '🎨', title: 'Artisan / Créateur', sub: 'Je fabrique et vends mes créations'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _NavBar(title: 'Mode vendeur', page: page, total: total,
-                onBack: onBack, onClose: onClose),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      text: const TextSpan(
-                        style: TextStyle(fontFamily: 'Poppins', fontSize: 30, height: 1.2, color: VAColors.black),
-                        children: [
-                          TextSpan(text: 'Vous vendez\n', style: TextStyle(fontWeight: FontWeight.w300)),
-                          TextSpan(text: 'comment ?', style: TextStyle(fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Nous adaptons votre expérience selon votre profil.',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: VAColors.greyText, height: 1.55),
-                    ),
-                    const SizedBox(height: 28),
-                    ...List.generate(_types.length, (i) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _TypeTile(
-                        emoji: _types[i].emoji,
-                        title: _types[i].title,
-                        sub: _types[i].sub,
-                        selected: selected == i,
-                        onTap: () => onSelect(i),
-                      ),
-                    )),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-              child: _PrimaryBtn(
-                label: 'Suivant →',
-                onTap: selected >= 0 ? onNext : null,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TypeTile extends StatelessWidget {
-  final String emoji, title, sub;
-  final bool selected;
-  final VoidCallback onTap;
-  const _TypeTile({required this.emoji, required this.title, required this.sub,
-      required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: selected ? VAColors.primaryLight : const Color(0xFFF7F7F7),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-              color: selected ? VAColors.primary : Colors.transparent,
-              width: 2),
-        ),
-        child: Row(
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 28)),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
-                          color: selected ? VAColors.primaryDark : VAColors.black)),
-                  Text(sub,
-                      style: const TextStyle(fontSize: 12, color: VAColors.greyText)),
-                ],
-              ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: selected ? VAColors.primary : Colors.transparent,
-                border: Border.all(
-                    color: selected ? VAColors.primary : VAColors.greyBorder,
-                    width: 2),
-              ),
-              child: selected
-                  ? const Icon(Icons.check, color: Colors.white, size: 13)
-                  : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  ÉTAPE 2 — CATÉGORIES
+//  ÉTAPE 1 — CATÉGORIES
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _StepCategories extends StatelessWidget {

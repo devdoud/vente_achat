@@ -4,6 +4,80 @@ library;
 import 'package:flutter/material.dart';
 import '../../theme/va_theme.dart';
 
+// ─── Bordure tiretée (remplace dotted_border) ────────────────────────────────
+
+class DashedBorder extends StatelessWidget {
+  final Widget child;
+  final double radius;
+  final Color color;
+  final double strokeWidth;
+  final List<double> dash;
+  const DashedBorder({
+    super.key,
+    required this.child,
+    this.radius     = 14,
+    this.color      = VAColors.greyBorder,
+    this.strokeWidth = 1.5,
+    this.dash       = const [8, 4],
+  });
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+        painter: _DashPainter(
+            radius: radius,
+            color: color,
+            strokeWidth: strokeWidth,
+            dash: dash),
+        child: child,
+      );
+}
+
+class _DashPainter extends CustomPainter {
+  final double radius, strokeWidth;
+  final Color color;
+  final List<double> dash;
+  const _DashPainter(
+      {required this.radius,
+      required this.color,
+      required this.strokeWidth,
+      required this.dash});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+            strokeWidth / 2,
+            strokeWidth / 2,
+            size.width - strokeWidth,
+            size.height - strokeWidth),
+        Radius.circular(radius),
+      ));
+
+    final len = dash[0];
+    final gap = dash.length > 1 ? dash[1] : dash[0];
+
+    for (final m in path.computeMetrics()) {
+      double d = 0;
+      while (d < m.length) {
+        canvas.drawPath(m.extractPath(d, d + len), paint);
+        d += len + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashPainter old) =>
+      old.color != color ||
+      old.strokeWidth != strokeWidth ||
+      old.radius != radius;
+}
+
 // ─── AppBar ───────────────────────────────────────────────────────────────────
 
 class CreationAppBar extends StatelessWidget implements PreferredSizeWidget {

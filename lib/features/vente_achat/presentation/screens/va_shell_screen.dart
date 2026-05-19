@@ -1,27 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/export.dart';
 import 'catalogue/va_home_screen.dart';
 import 'activite/activite_screen.dart';
 import 'activite/favoris_screen.dart';
-import 'vendeur/boutique_atelier_screen.dart';
-import 'vendeur/boutique_setup_screen.dart';
-import 'vendeur/vendre_onboarding_screen.dart';
-
-const _kOnboardingDone    = 'vendre_onboarding_done';
-const _kBoutiqueSetupDone = 'boutique_setup_done';
-const _kBoutiqueName      = 'boutique_name';
-const _kBoutiqueEmoji     = 'boutique_emoji';
-const _kBoutiqueVille     = 'boutique_ville';
-const _kBoutiqueQuartier  = 'boutique_quartier';
+import 'vendeur/vendre_choix_screen.dart';
 
 /// Shell persistant du module Vente & Achat.
 ///
-/// Flux Vendre :
-///   1ère fois          → VendreOnboardingScreen → BoutiqueSetupScreen
-///   Onboarding fait,
-///   Setup non fait     → BoutiqueSetupScreen
-///   Tout fait          → BoutiqueAtelierScreen (hub vendeur)
+/// Flux Vendre → VendreChoixScreen (choix particulier vs boutique)
 class VAShellScreen extends StatefulWidget {
   const VAShellScreen({super.key});
 
@@ -48,29 +34,12 @@ class _VAShellScreenState extends State<VAShellScreen> {
   }
 
   Future<void> _openVendre() async {
-    final prefs        = await SharedPreferences.getInstance();
-    final onbDone      = prefs.getBool(_kOnboardingDone)    ?? false;
-    final setupDone    = prefs.getBool(_kBoutiqueSetupDone) ?? false;
-    final nom      = prefs.getString(_kBoutiqueName)     ?? '';
-    final emoji    = prefs.getString(_kBoutiqueEmoji)    ?? '🛍';
-    final ville    = prefs.getString(_kBoutiqueVille)    ?? '';
-    final quartier = prefs.getString(_kBoutiqueQuartier) ?? '';
     if (!mounted) return;
-
-    Widget screen;
-    if (!onbDone) {
-      screen = const VendreOnboardingScreen();
-    } else if (!setupDone) {
-      screen = const BoutiqueSetupScreen();
-    } else {
-      screen = BoutiqueAtelierScreen(
-        nom: nom, emoji: emoji,
-        ville: ville, quartier: quartier,
-      );
-    }
-
     Navigator.of(context).push(
-      MaterialPageRoute(fullscreenDialog: true, builder: (_) => screen),
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const VendreChoixScreen(),
+      ),
     );
   }
 

@@ -4,6 +4,8 @@ import '../../theme/va_theme.dart';
 import '../../../domain/export.dart';
 import 'annonce_detail_screen.dart';
 import 'annonces_feed_screen.dart';
+import 'search_screen.dart';
+import '../compte/filtres_screen.dart';
 
 // ─── Données statiques ────────────────────────────────────────────────────────
 
@@ -126,27 +128,55 @@ class _LocationChip extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _SearchBar extends StatelessWidget {
+  void _openSearch(BuildContext context) => Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const SearchScreen(),
+          transitionsBuilder: (_, anim, __, child) =>
+              FadeTransition(opacity: anim, child: child),
+          transitionDuration: const Duration(milliseconds: 180),
+        ),
+      );
+
+  void _openFilters(BuildContext context) => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const FiltresScreen(),
+      );
+
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () {},
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: const [BoxShadow(color: Color(0x0D000000), blurRadius: 14, offset: Offset(0, 4))],
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              const Icon(Icons.search_rounded, color: VAColors.primary, size: 22),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text('Que cherchez-vous ?',
-                    style: TextStyle(color: Color(0xFFBBBBBB), fontSize: 14)),
+  Widget build(BuildContext context) => Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: const [
+            BoxShadow(color: Color(0x0D000000), blurRadius: 14, offset: Offset(0, 4))
+          ],
+        ),
+        child: Row(
+          children: [
+            // Zone de recherche (tap → SearchScreen)
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _openSearch(context),
+                behavior: HitTestBehavior.opaque,
+                child: const Row(
+                  children: [
+                    SizedBox(width: 16),
+                    Icon(Icons.search_rounded, color: VAColors.primary, size: 22),
+                    SizedBox(width: 10),
+                    Text('Que cherchez-vous ?',
+                        style: TextStyle(color: Color(0xFFBBBBBB), fontSize: 14)),
+                  ],
+                ),
               ),
-              Container(
+            ),
+            // Bouton filtre (tap → FiltresScreen)
+            GestureDetector(
+              onTap: () => _openFilters(context),
+              child: Container(
                 margin: const EdgeInsets.all(7),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
@@ -155,8 +185,8 @@ class _SearchBar extends StatelessWidget {
                 ),
                 child: const Icon(Icons.tune_rounded, color: Colors.white, size: 15),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
 }

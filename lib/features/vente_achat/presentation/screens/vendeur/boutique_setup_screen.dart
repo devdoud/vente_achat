@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/va_theme.dart';
 import 'boutique_atelier_screen.dart';
+import 'creation_widgets.dart';
 
 const _kBoutiqueSetupDone = 'boutique_setup_done';
 const _kBoutiqueName      = 'boutique_name';
@@ -16,8 +19,17 @@ const _villes = [
   'Parakou', 'Bohicon', 'Lokossa', 'Ouidah', 'Natitingou',
 ];
 
-// ─── Emojis ───────────────────────────────────────────────────────────────────
-const _logos = ['🛍', '📱', '👜', '🏠', '💄', '🖥', '⚽', '📚'];
+// ─── Icônes boutique avec palette de couleurs ─────────────────────────────────
+const _logos = [
+  (e: '🛍',  l: 'Boutique',   bg: Color(0xFFFFF3E0), ring: Color(0xFFFF6D00)),
+  (e: '📱',  l: 'Téléphones', bg: Color(0xFFE3F2FD), ring: Color(0xFF1976D2)),
+  (e: '👜',  l: 'Mode',       bg: Color(0xFFFCE4EC), ring: Color(0xFFE91E63)),
+  (e: '🏠',  l: 'Maison',     bg: Color(0xFFE8F5E9), ring: Color(0xFF388E3C)),
+  (e: '💄',  l: 'Beauté',     bg: Color(0xFFF3E5F5), ring: Color(0xFF8E24AA)),
+  (e: '🖥',  l: 'High-tech',  bg: Color(0xFFE8EAF6), ring: Color(0xFF3949AB)),
+  (e: '⚽',  l: 'Sport',      bg: Color(0xFFF1F8E9), ring: Color(0xFF558B2F)),
+  (e: '📚',  l: 'Livres',     bg: Color(0xFFFFF8E1), ring: Color(0xFFF57F17)),
+];
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  ÉCRAN PRINCIPAL
@@ -37,7 +49,6 @@ class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
   String _ville    = 'Cotonou';
   String _quartier = '';
   String _adresse  = '';
-
   void _toStep(int s) => setState(() => _step = s);
 
   Future<void> _finish() async {
@@ -94,11 +105,16 @@ class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
               _toStep(2);
             },
           ),
-        _ => _StepPret(
+        2 => _StepRCCM(
             key: const ValueKey(2),
-            nom:     _nom,
-            emoji:   _emoji,
-            ville:   _ville,
+            onBack: () => _toStep(1),
+            onNext: (_) => _toStep(3),
+          ),
+        _ => _StepPret(
+            key: const ValueKey(3),
+            nom:      _nom,
+            emoji:    _emoji,
+            ville:    _ville,
             quartier: _quartier,
             onFinish: _finish,
           ),
@@ -194,47 +210,79 @@ class _StepIdentiteState extends State<_StepIdentite> {
 
                     // Icône
                     _Label('Icône de votre boutique'),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 4,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 1,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.78,
                       ),
                       itemCount: _logos.length,
                       itemBuilder: (_, i) {
-                        final e = _logos[i];
-                        final sel = _emoji == e;
+                        final item = _logos[i];
+                        final sel = _emoji == item.e;
                         return GestureDetector(
-                          onTap: () => setState(() => _emoji = e),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            decoration: BoxDecoration(
-                              color: sel ? VAColors.primaryLight : Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: sel ? VAColors.primary : VAColors.greyBorder,
-                                width: sel ? 2 : 1,
+                          onTap: () => setState(() => _emoji = item.e),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 220),
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: sel ? item.bg : Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: sel ? item.ring : const Color(0xFFEEEEEE),
+                                    width: sel ? 2.5 : 1.5,
+                                  ),
+                                  boxShadow: sel
+                                      ? [BoxShadow(
+                                          color: item.ring.withValues(alpha: 0.22),
+                                          blurRadius: 14,
+                                          offset: const Offset(0, 5))]
+                                      : [const BoxShadow(
+                                          color: Color(0x0A000000),
+                                          blurRadius: 6,
+                                          offset: Offset(0, 2))],
+                                ),
+                                child: Center(
+                                  child: AnimatedScale(
+                                    scale: sel ? 1.18 : 1.0,
+                                    duration: const Duration(milliseconds: 220),
+                                    child: Text(item.e,
+                                        style: const TextStyle(fontSize: 26)),
+                                  ),
+                                ),
                               ),
-                              boxShadow: sel
-                                  ? [BoxShadow(
-                                      color: VAColors.primary.withValues(alpha: 0.18),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4))]
-                                  : [const BoxShadow(
-                                      color: Color(0x08000000),
-                                      blurRadius: 4,
-                                      offset: Offset(0, 2))],
-                            ),
-                            child: Center(
-                              child: Text(e,
-                                  style: TextStyle(
-                                      fontSize: sel ? 32 : 28)),
-                            ),
+                              const SizedBox(height: 6),
+                              AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 200),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: sel
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: sel ? item.ring : VAColors.greyText,
+                                ),
+                                child: Text(item.l, textAlign: TextAlign.center),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.only(top: 3),
+                                width: sel ? 5 : 0,
+                                height: sel ? 5 : 0,
+                                decoration: BoxDecoration(
+                                  color: item.ring,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },
@@ -463,6 +511,7 @@ class _StepPretState extends State<_StepPret>
   late Animation<double>  _scale;
   late Animation<double>  _fade;
   late Animation<Offset>  _slide;
+  bool _cgv = false;
 
   @override
   void initState() {
@@ -486,7 +535,7 @@ class _StepPretState extends State<_StepPret>
       body: SafeArea(
         child: Column(
           children: [
-            _SetupHeader(step: 3, showBack: false),
+            _SetupHeader(step: 4, total: 4, showBack: false),
 
             Expanded(
               child: Center(
@@ -539,26 +588,101 @@ class _StepPretState extends State<_StepPret>
               ),
             ),
 
+            // ── CGV ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+              child: GestureDetector(
+                onTap: () => setState(() => _cgv = !_cgv),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _cgv ? VAColors.primary : const Color(0xFFEEEEEE),
+                      width: _cgv ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        width: 22, height: 22,
+                        margin: const EdgeInsets.only(top: 1),
+                        decoration: BoxDecoration(
+                          color: _cgv ? VAColors.primary : Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: _cgv ? VAColors.primary : VAColors.greyBorder,
+                            width: 1.5,
+                          ),
+                          boxShadow: _cgv ? [BoxShadow(
+                            color: VAColors.primary.withValues(alpha: 0.22),
+                            blurRadius: 6,
+                          )] : null,
+                        ),
+                        child: _cgv
+                            ? const Icon(Icons.check_rounded,
+                                size: 14, color: Colors.white)
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'J\'accepte les conditions générales de vente',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: VAColors.black,
+                                  height: 1.4),
+                            ),
+                            const SizedBox(height: 3),
+                            GestureDetector(
+                              onTap: () {},
+                              child: const Text('Lire les conditions →',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: VAColors.primary,
+                                      fontWeight: FontWeight.w600)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
             // CTAs
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: GestureDetector(
-                onTap: widget.onFinish,
-                child: Container(
+                onTap: _cgv ? widget.onFinish : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: VAColors.primary,
+                    color: _cgv ? VAColors.primary : VAColors.greyBorder,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(
+                    boxShadow: _cgv ? [BoxShadow(
                       color: VAColors.primary.withValues(alpha: 0.35),
                       blurRadius: 14, offset: const Offset(0, 5),
-                    )],
+                    )] : null,
                   ),
-                  child: const Text('Publier mon premier produit →',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white,
-                          fontSize: 15, fontWeight: FontWeight.w800)),
+                  child: Text(
+                    'Publier mon premier produit →',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: _cgv ? Colors.white : VAColors.grey,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800),
+                  ),
                 ),
               ),
             ),
@@ -666,6 +790,325 @@ class _RecapCard extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  ÉTAPE 3 — JUSTIFICATIF PROFESSIONNEL (RCCM)
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _StepRCCM extends StatefulWidget {
+  final VoidCallback onBack;
+  final void Function(XFile? rccm) onNext;
+  const _StepRCCM({super.key, required this.onBack, required this.onNext});
+
+  @override
+  State<_StepRCCM> createState() => _StepRCCMState();
+}
+
+class _StepRCCMState extends State<_StepRCCM> {
+  XFile? _rccm;
+  final _picker = ImagePicker();
+
+  Future<void> _pick() async {
+    final file = await _picker.pickImage(
+        source: ImageSource.gallery, maxWidth: 1920, imageQuality: 90);
+    if (file != null && mounted) setState(() => _rccm = file);
+  }
+
+  Future<void> _pickFromCamera() async {
+    final file = await _picker.pickImage(
+        source: ImageSource.camera, maxWidth: 1920, imageQuality: 90);
+    if (file != null && mounted) setState(() => _rccm = file);
+  }
+
+  void _showSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(24)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                  color: const Color(0xFFE0DDD8),
+                  borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 18),
+            const Text('Ajouter le RCCM',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            const SizedBox(height: 6),
+            const Text('Document ou photo du registre',
+                style: TextStyle(fontSize: 12, color: VAColors.greyText)),
+            const SizedBox(height: 16),
+            _RCCMSheetOption(
+              icon: Icons.camera_alt_outlined,
+              color: VAColors.primary,
+              label: 'Photographier le document',
+              sub: 'Utiliser l\'appareil photo',
+              onTap: () { Navigator.pop(ctx); _pickFromCamera(); },
+            ),
+            Divider(height: 1, indent: 66, color: Colors.grey.shade100),
+            _RCCMSheetOption(
+              icon: Icons.photo_library_outlined,
+              color: const Color(0xFF6B7FD4),
+              label: 'Choisir depuis la galerie',
+              sub: 'Scan ou photo existante',
+              onTap: () { Navigator.pop(ctx); _pick(); },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F3EF),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _SetupHeader(step: 3, total: 4, onBack: widget.onBack),
+
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Titre
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 28,
+                            height: 1.2,
+                            color: VAColors.black),
+                        children: [
+                          TextSpan(
+                              text: 'Justificatif\n',
+                              style: TextStyle(fontWeight: FontWeight.w300)),
+                          TextSpan(
+                              text: 'professionnel',
+                              style: TextStyle(fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Registre du Commerce et du Crédit Mobilier (RCCM)',
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: VAColors.greyText,
+                          height: 1.5),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Info carte
+                    _InfoCard(
+                      icon: '✅',
+                      text:
+                          'Les boutiques vérifiées bénéficient d\'un badge de confiance visible par tous les acheteurs sur chaque annonce.',
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Zone upload
+                    _rccm == null
+                        ? GestureDetector(
+                            onTap: _showSheet,
+                            child: DashedBorder(
+                              child: Container(
+                                height: 120,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 46, height: 46,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE8EAF6),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                          Icons.badge_outlined,
+                                          size: 22,
+                                          color: Color(0xFF3949AB)),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      'Ajouter votre RCCM',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: VAColors.black),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    const Text(
+                                      'Photo ou scan du document',
+                                      style: TextStyle(
+                                          fontSize: 11, color: VAColors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: Image.file(
+                                  File(_rccm!.path),
+                                  height: 140,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 8, left: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF3949AB),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.verified_outlined,
+                                          size: 12, color: Colors.white),
+                                      SizedBox(width: 4),
+                                      Text('RCCM ajouté',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 8, right: 8,
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _rccm = null),
+                                  child: Container(
+                                    width: 28, height: 28,
+                                    decoration: BoxDecoration(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.55),
+                                        shape: BoxShape.circle),
+                                    child: const Icon(Icons.close,
+                                        color: Colors.white, size: 14),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                    const SizedBox(height: 16),
+
+                    // Note "pas encore de RCCM"
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0EDE8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded,
+                              size: 15, color: VAColors.greyText),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Vous pouvez ajouter votre RCCM plus tard depuis les paramètres de votre boutique.',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: VAColors.greyText,
+                                  height: 1.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ),
+
+            _SetupCTA(
+              label: _rccm != null
+                  ? 'Continuer →'
+                  : 'Passer cette étape →',
+              enabled: true,
+              onTap: () => widget.onNext(_rccm),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RCCMSheetOption extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label, sub;
+  final VoidCallback onTap;
+  const _RCCMSheetOption(
+      {required this.icon,
+      required this.color,
+      required this.label,
+      required this.sub,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    shape: BoxShape.circle),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 14)),
+                    const SizedBox(height: 2),
+                    Text(sub,
+                        style: const TextStyle(
+                            fontSize: 12, color: VAColors.greyText)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  COMPOSANTS PARTAGÉS
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -673,71 +1116,76 @@ class _RecapCard extends StatelessWidget {
 
 class _SetupHeader extends StatelessWidget {
   final int step;
+  final int total;
   final VoidCallback? onBack;
   final bool showBack;
-  const _SetupHeader({required this.step, this.onBack, this.showBack = true});
+  const _SetupHeader(
+      {required this.step,
+      this.total = 4,
+      this.onBack,
+      this.showBack = true});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFFF5F3EF),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              if (showBack)
-                GestureDetector(
-                  onTap: onBack ?? () => Navigator.of(context).pop(),
-                  child: Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(color: Color(0x0E000000), blurRadius: 6)
-                        ]),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 15, color: VAColors.black),
-                  ),
-                )
-              else
-                const SizedBox(width: 36),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Étape $step sur 3',
-                      style: const TextStyle(
-                          fontSize: 11, color: VAColors.primary,
-                          fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                    ),
-                    const SizedBox(height: 6),
-                    // Barres de progression
-                    Row(
-                      children: List.generate(3, (i) => Expanded(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          height: 3.5,
-                          margin: EdgeInsets.only(right: i < 2 ? 4 : 0),
-                          decoration: BoxDecoration(
-                            color: i < step
-                                ? VAColors.primary
-                                : VAColors.greyBorder,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      )),
-                    ),
-                  ],
-                ),
+          if (showBack)
+            GestureDetector(
+              onTap: onBack ?? () => Navigator.of(context).pop(),
+              child: Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x0E000000), blurRadius: 6)
+                    ]),
+                child: const Icon(Icons.arrow_back_ios_new_rounded,
+                    size: 15, color: VAColors.black),
               ),
-              const SizedBox(width: 36), // balance
-            ],
+            )
+          else
+            const SizedBox(width: 36),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Étape $step sur $total',
+                  style: const TextStyle(
+                      fontSize: 11,
+                      color: VAColors.primary,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: List.generate(
+                    total,
+                    (i) => Expanded(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: 3.5,
+                        margin:
+                            EdgeInsets.only(right: i < total - 1 ? 4 : 0),
+                        decoration: BoxDecoration(
+                          color: i < step
+                              ? VAColors.primary
+                              : VAColors.greyBorder,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 36),
         ],
       ),
     );
