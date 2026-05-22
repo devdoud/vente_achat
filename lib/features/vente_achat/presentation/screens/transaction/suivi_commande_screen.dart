@@ -19,7 +19,7 @@ class SuiviCommandeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(
         title: 'Commande #$commandeId',
         actions: [IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {})],
@@ -131,10 +131,10 @@ class _DriverCard extends StatelessWidget {
                 Text('Yao Kouamé', style: VATextStyles.bodyMedium),
                 Row(children: [
                   Icon(Icons.star_rounded, color: VAColors.star, size: 14),
-                  Text(' 4.8', style: VATextStyles.caption),
+                  Text('4.8', style: VATextStyles.caption),
                   SizedBox(width: 8),
                   Icon(Icons.directions_car_rounded, size: 14, color: VAColors.grey),
-                  Text(' AB-23S', style: VATextStyles.caption),
+                  Text('AB-23S', style: VATextStyles.caption),
                 ]),
               ],
             ),
@@ -237,7 +237,7 @@ class _CommandeRecap extends StatelessWidget {
               Container(
                 width: 48, height: 48,
                 decoration: BoxDecoration(color: const Color(0xFFE3F2FD), borderRadius: BorderRadius.circular(VARadius.sm)),
-                child: const Center(child: Text('📱', style: TextStyle(fontSize: 24))),
+                child: const Center(child: Icon(Icons.local_shipping_outlined, size: 22, color: Color(0xFF1976D2))),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -249,7 +249,7 @@ class _CommandeRecap extends StatelessWidget {
                       Text('Adjoa K.', style: VATextStyles.caption),
                       SizedBox(width: 4),
                       Icon(Icons.star_rounded, color: VAColors.star, size: 12),
-                      Text(' 4.9', style: VATextStyles.caption),
+                      Text('4.9', style: VATextStyles.caption),
                     ]),
                   ],
                 ),

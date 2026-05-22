@@ -3,19 +3,19 @@ import '../../theme/va_theme.dart';
 import '../../../domain/export.dart';
 import 'creation_annonce_photos_screen.dart';
 
-// ─── Modèle tâche à compléter ─────────────────────────────────────────────────
+//  Modèle tâche à compléter 
 
 class _Task {
-  final String emoji;
+  final IconData icon;
   final String title;
   final String? sub;
   final Color accent;
   bool done = false;
-  _Task({required this.emoji, required this.title, this.sub,
+  _Task({required this.icon, required this.title, this.sub,
       this.accent = VAColors.black});
 }
 
-// ─── Écran principal ──────────────────────────────────────────────────────────
+//  Écran principal 
 
 class BoutiqueDashboardScreen extends StatefulWidget {
   const BoutiqueDashboardScreen({super.key});
@@ -28,15 +28,15 @@ class _BoutiqueDashboardState extends State<BoutiqueDashboardScreen> {
   final Vendeur _vendeur = VendeursMock.adjoa;
 
   final List<_Task> _tasks = [
-    _Task(emoji: '📷', title: 'Ajouter une photo de profil',
+    _Task(icon: Icons.add_a_photo_outlined, title: 'Ajouter une photo de profil',
         sub: 'Rassurez les acheteurs avec un vrai visage'),
-    _Task(emoji: '📦', title: 'Publier votre première annonce',
+    _Task(icon: Icons.add_box_outlined, title: 'Publier votre première annonce',
         sub: 'Mettez votre premier produit en ligne'),
-    _Task(emoji: 'ℹ️',  title: 'Compléter les infos boutique',
+    _Task(icon: Icons.info_outline_rounded, title: 'Compléter les infos boutique',
         sub: 'Description, adresse, contacts'),
-    _Task(emoji: '📱', title: 'Partager sur les réseaux',
+    _Task(icon: Icons.share_outlined, title: 'Partager sur les réseaux',
         sub: 'Attirez vos premiers acheteurs'),
-    _Task(emoji: '💜', title: 'Attirer vos abonnés',
+    _Task(icon: Icons.people_outline_rounded, title: 'Attirer vos abonnés',
         sub: 'Concluez 1 vente et gagnez +50 abonnés',
         accent: VAColors.purple),
   ];
@@ -46,21 +46,21 @@ class _BoutiqueDashboardState extends State<BoutiqueDashboardScreen> {
     final pending = _tasks.where((t) => !t.done).length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // ── Header boutique ─────────────────────────────────────────
+            //  Header boutique 
             SliverToBoxAdapter(child: _BoutiqueHeader(vendeur: _vendeur)),
 
-            // ── Actions rapides ──────────────────────────────────────────
+            //  Actions rapides 
             SliverToBoxAdapter(child: _QuickActions()),
 
-            // ── Stats ────────────────────────────────────────────────────
+            //  Stats 
             SliverToBoxAdapter(child: _StatsSection()),
 
-            // ── À compléter ──────────────────────────────────────────────
+            //  À compléter 
             SliverToBoxAdapter(
               child: _TaskSection(
                 tasks: _tasks,
@@ -69,7 +69,7 @@ class _BoutiqueDashboardState extends State<BoutiqueDashboardScreen> {
               ),
             ),
 
-            // ── Mes annonces (vide pour l'instant) ──────────────────────
+            //  Mes annonces (vide pour l'instant) 
             SliverToBoxAdapter(child: _MyListings()),
 
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
@@ -77,15 +77,15 @@ class _BoutiqueDashboardState extends State<BoutiqueDashboardScreen> {
         ),
       ),
 
-      // ── Bouton publier une annonce ────────────────────────────────────
+      //  Bouton publier une annonce 
       bottomNavigationBar: _PublishBar(),
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  HEADER BOUTIQUE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _BoutiqueHeader extends StatelessWidget {
   final Vendeur vendeur;
@@ -176,9 +176,9 @@ class _BoutiqueHeader extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ACTIONS RAPIDES
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _QuickActions extends StatelessWidget {
   @override
@@ -251,9 +251,9 @@ class _ActionChip extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  STATS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StatsSection extends StatelessWidget {
   @override
@@ -302,7 +302,7 @@ class _StatsSection extends StatelessWidget {
           // Métriques
           Row(
             children: [
-              const _StatTile(value: '0', label: 'Revenus', suffix: ' F'),
+              const _StatTile(value: '0', label: 'Revenus', suffix: 'F'),
               _VLine(),
               const _StatTile(value: '0', label: 'Ventes'),
               _VLine(),
@@ -345,9 +345,9 @@ class _VLine extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 10));
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  TÂCHES À COMPLÉTER
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _TaskSection extends StatelessWidget {
   final List<_Task> tasks;
@@ -430,7 +430,7 @@ class _TaskTile extends StatelessWidget {
                     : VAColors.greyLight,
                 shape: BoxShape.circle,
               ),
-              child: Center(child: Text(task.emoji, style: const TextStyle(fontSize: 16))),
+              child: Center(child: Icon(task.icon, size: 18, color: VAColors.greyText)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -464,9 +464,9 @@ class _TaskTile extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  MES ANNONCES (vide state)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _MyListings extends StatelessWidget {
   @override
@@ -521,9 +521,9 @@ class _MyListings extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  BARRE DE PUBLICATION
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _PublishBar extends StatelessWidget {
   @override

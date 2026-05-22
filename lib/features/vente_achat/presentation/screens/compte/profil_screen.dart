@@ -13,7 +13,7 @@ class ProfilScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(
         title: 'Mon profil',
         showBack: false,

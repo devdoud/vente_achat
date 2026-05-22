@@ -107,7 +107,7 @@ class _ProductImage extends StatelessWidget {
                 color: VAColors.primary,
                 borderRadius: BorderRadius.circular(VARadius.xs),
               ),
-              child: const Text('✓ Pro', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+              child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
             ),
           ),
         if (annonce.remisePourcent != null)

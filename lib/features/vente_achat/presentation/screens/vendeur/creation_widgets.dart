@@ -4,7 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import '../../theme/va_theme.dart';
 
-// ─── Bordure tiretée (remplace dotted_border) ────────────────────────────────
+//  Bordure tiretée (remplace dotted_border) 
 
 class DashedBorder extends StatelessWidget {
   final Widget child;
@@ -78,7 +78,7 @@ class _DashPainter extends CustomPainter {
       old.radius != radius;
 }
 
-// ─── AppBar ───────────────────────────────────────────────────────────────────
+//  AppBar 
 
 class CreationAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -117,7 +117,7 @@ class CreationAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-// ─── Barre de progression ─────────────────────────────────────────────────────
+//  Barre de progression 
 
 class CreationStepBar extends StatelessWidget {
   final int current, total;
@@ -144,7 +144,7 @@ class CreationStepBar extends StatelessWidget {
   }
 }
 
-// ─── Bottom bar retour / continuer ───────────────────────────────────────────
+//  Bottom bar retour / continuer 
 
 class CreationBottomBar extends StatelessWidget {
   final VoidCallback onBack, onNext;
@@ -163,7 +163,7 @@ class CreationBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-      color: const Color(0xFFF5F3EF),
+      color: Colors.white,
       child: Row(
         children: [
           GestureDetector(

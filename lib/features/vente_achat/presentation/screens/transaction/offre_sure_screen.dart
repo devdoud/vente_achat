@@ -20,7 +20,7 @@ class OffreSureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(title: 'Offre Sûre'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(VAPadding.base),
@@ -69,7 +69,7 @@ class OffreSureScreen extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(VAPadding.base, VAPadding.sm, VAPadding.base, VAPadding.xl),
         child: Builder(builder: (context) => VAPrimaryButton(
-          label: '🔒  Confirmer et payer ${annonce.prixFormate}',
+          label: 'Confirmer et payer ${annonce.prixFormate}',
           onPressed: () => Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => ConfirmationScreen(
               commandeId: '2849',
@@ -109,7 +109,7 @@ class _AnnonceCard extends StatelessWidget {
               children: [
                 Text(annonce.titre, style: VATextStyles.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                 Text('Vendu par ${annonce.vendeur.nom}', style: VATextStyles.caption),
-                Row(children: [const Icon(Icons.star_rounded, color: VAColors.star, size: 12), Text(' ${annonce.vendeur.note}', style: VATextStyles.caption)]),
+                Row(children: [const Icon(Icons.star_rounded, color: VAColors.star, size: 12), Text('${annonce.vendeur.note}', style: VATextStyles.caption)]),
               ],
             ),
           ),

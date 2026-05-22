@@ -19,8 +19,8 @@ class _FiltresScreenState extends State<FiltresScreen> {
   bool _isVerifie  = false;
 
   static const _cats = [
-    '📱 Téléphones', '📷 Photo', '🖥 Ordinateurs',
-    '🎧 Audio', '👜 Mode', '🏠 Maison',
+    'Téléphones', 'Photo', 'Ordinateurs',
+    'Audio', 'Mode', 'Maison',
   ];
   static const _etats = ['Neuf', 'Comme neuf', 'Bon état', 'Correct'];
   static const _locs  = ['Près de moi', 'Cotonou', 'Porto-Novo', 'Parakou'];
@@ -55,7 +55,7 @@ class _FiltresScreenState extends State<FiltresScreen> {
         child: Column(
           children: [
 
-            // ── Handle ──────────────────────────────────────────────────
+            //  Handle 
             Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 4),
               child: Container(
@@ -67,7 +67,7 @@ class _FiltresScreenState extends State<FiltresScreen> {
               ),
             ),
 
-            // ── Header ──────────────────────────────────────────────────
+            //  Header 
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 10, 22, 6),
               child: Row(
@@ -101,7 +101,7 @@ class _FiltresScreenState extends State<FiltresScreen> {
 
             const Divider(height: 1, color: Color(0xFFF5F2EE)),
 
-            // ── Contenu scrollable ───────────────────────────────────────
+            //  Contenu scrollable 
             Expanded(
               child: ListView(
                 controller: ctrl,
@@ -193,7 +193,7 @@ class _FiltresScreenState extends State<FiltresScreen> {
                         onTap: () => setState(() => _isPro = !_isPro),
                       ),
                       _Chip(
-                        label: '✓ Vérifié',
+                        label: 'Vérifié',
                         selected: _isVerifie,
                         onTap: () =>
                             setState(() => _isVerifie = !_isVerifie),
@@ -240,9 +240,9 @@ class _FiltresScreenState extends State<FiltresScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  COMPOSANTS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _SectionTitle extends StatelessWidget {
   final String text;
@@ -252,7 +252,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         text,
         style: const TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             color: VAColors.black),
       );
@@ -261,7 +261,7 @@ class _SectionTitle extends StatelessWidget {
 class _Separator extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 20),
+        padding: EdgeInsets.symmetric(vertical: 14),
         child: Divider(height: 1, color: Color(0xFFF5F2EE)),
       );
 }
@@ -286,8 +286,8 @@ class _Chip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(
-          horizontal: prefixIcon != null ? 10 : 14,
-          vertical: 9,
+          horizontal: prefixIcon != null ? 8 : 11,
+          vertical: 6,
         ),
         decoration: BoxDecoration(
           color: selected ? VAColors.primaryLight : const Color(0xFFFAF8F5),
@@ -309,7 +309,7 @@ class _Chip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight:
                       selected ? FontWeight.w700 : FontWeight.w500,
                   color: selected ? VAColors.primaryDark : VAColors.greyText),
@@ -350,7 +350,7 @@ class _PriceBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: const Color(0xFFFAF8F5),
           borderRadius: BorderRadius.circular(12),
@@ -368,7 +368,7 @@ class _PriceBox extends StatelessWidget {
             Text(value,
                 style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: VAColors.black)),
           ],

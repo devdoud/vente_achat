@@ -17,7 +17,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
   bool   _setupDone = false;
   bool   _onbDone   = false;
   String _nom       = '';
-  String _emoji     = '🛍';
+  String _emoji     = '';
   String _ville     = '';
   String _quartier  = '';
 
@@ -34,7 +34,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
       _onbDone   = p.getBool('vendre_onboarding_done') ?? false;
       _setupDone = p.getBool('boutique_setup_done')    ?? false;
       _nom       = p.getString('boutique_name')        ?? '';
-      _emoji     = p.getString('boutique_emoji')       ?? '🛍';
+      _emoji     = p.getString('boutique_emoji')       ?? '';
       _ville     = p.getString('boutique_ville')       ?? '';
       _quartier  = p.getString('boutique_quartier')    ?? '';
     });
@@ -60,7 +60,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -68,7 +68,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // ── Retour ──────────────────────────────────────────────────
+              //  Retour 
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
@@ -91,7 +91,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
 
               const SizedBox(height: 18),
 
-              // ── Titre ────────────────────────────────────────────────────
+              //  Titre 
               RichText(
                 text: const TextSpan(
                   style: TextStyle(
@@ -112,15 +112,16 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
 
               const SizedBox(height: 20),
 
-              // ── Cartes (remplissent l'espace restant) ────────────────────
+              //  Cartes (remplissent l'espace restant) 
               Expanded(
                 child: Column(
                   children: [
 
                     Expanded(
                       child: _OptionCard(
-                        emoji:       '📦',
-                        emojiColor:  VAColors.primaryLight,
+                        icon:        Icons.shopping_bag_outlined,
+                        iconColor:   VAColors.primary,
+                        iconBg:      VAColors.primaryLight,
                         title:       'Vendre un article',
                         description: 'Quelques effets perso à vendre ?\nSimple, rapide et sans engagement.',
                         hints: const ['Photos', 'Détails & prix', 'Justificatif'],
@@ -134,8 +135,9 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
 
                     Expanded(
                       child: _OptionCard(
-                        emoji:       _setupDone ? _emoji : '🏪',
-                        emojiColor:  const Color(0xFFEDE7F6),
+                        icon:      Icons.storefront_outlined,
+                        iconColor: const Color(0xFF5C6BC0),
+                        iconBg:    const Color(0xFFEDE7F6),
                         title:       _setupDone
                             ? (_nom.isNotEmpty ? _nom : 'Ma boutique')
                             : 'Ouvrir ma boutique',
@@ -146,7 +148,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
                             ? const ['Atelier', 'Annonces', 'Stats']
                             : const ['Identité', 'Lieu', 'RCCM', 'Prêt'],
                         accentColor: const Color(0xFF5C6BC0),
-                        ctaLabel:    _setupDone ? 'Accéder' : 'Configurer',
+                        ctaLabel:    _setupDone ? 'Accéder': 'Configurer',
                         onTap:       _goBoutique,
                       ),
                     ),
@@ -162,13 +164,14 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CARTE — s'étire pour remplir sa moitié de l'écran
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _OptionCard extends StatelessWidget {
-  final String       emoji;
-  final Color        emojiColor;
+  final IconData     icon;
+  final Color        iconColor;
+  final Color        iconBg;
   final String       title;
   final String       description;
   final List<String> hints;
@@ -177,8 +180,9 @@ class _OptionCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _OptionCard({
-    required this.emoji,
-    required this.emojiColor,
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
     required this.title,
     required this.description,
     required this.hints,
@@ -213,10 +217,9 @@ class _OptionCard extends StatelessWidget {
               Container(
                 width: 48, height: 48,
                 decoration: BoxDecoration(
-                    color: emojiColor, shape: BoxShape.circle),
+                    color: iconBg, shape: BoxShape.circle),
                 child: Center(
-                    child: Text(emoji,
-                        style: const TextStyle(fontSize: 22))),
+                    child: Icon(icon, size: 22, color: iconColor)),
               ),
               const SizedBox(width: 14),
               Expanded(

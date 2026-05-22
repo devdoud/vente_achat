@@ -90,7 +90,7 @@ class _CreationAnnoncePhotosScreenState
     final bool hasFull = _photos.length >= _maxPhotos;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       appBar: CreationAppBar(
         title: 'Nouvelle annonce',
         onBack: () => Navigator.of(context).pop(),
@@ -140,7 +140,7 @@ class _CreationAnnoncePhotosScreenState
                       style: TextStyle(
                           fontWeight: FontWeight.w700,
                           color: VAColors.black)),
-                  TextSpan(text: ' est la plus importante.'),
+                  TextSpan(text: 'est la plus importante.'),
                 ],
               ),
             ),
@@ -187,9 +187,9 @@ class _CreationAnnoncePhotosScreenState
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  PICKER BOTTOM SHEET
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _PickerSheet extends StatelessWidget {
   final VoidCallback onCamera;
@@ -299,9 +299,9 @@ class _SheetOption extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ZONE D'UPLOAD
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _UploadZone extends StatelessWidget {
   final VoidCallback onTap;
@@ -417,9 +417,9 @@ class _UploadZone extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  GRILLE PHOTOS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _PhotoGrid extends StatelessWidget {
   final List<XFile> photos;
@@ -620,9 +620,9 @@ class _PhotoTile extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  TIP ROW
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _TipRow extends StatelessWidget {
   final IconData icon;

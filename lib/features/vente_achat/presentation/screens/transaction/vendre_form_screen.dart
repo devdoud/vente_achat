@@ -23,14 +23,14 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
   final _descCtrl  = TextEditingController();
 
   static const _categories = [
-    (emoji: '📱', label: 'Téléphones'),
-    (emoji: '👜', label: 'Mode'),
-    (emoji: '🏠', label: 'Maison'),
-    (emoji: '🚗', label: 'Auto'),
-    (emoji: '💄', label: 'Beauté'),
-    (emoji: '🖥',  label: 'High-tech'),
-    (emoji: '⚽', label: 'Sport'),
-    (emoji: '📚', label: 'Livres'),
+    (emoji: '', label: 'Téléphones'),
+    (emoji: '', label: 'Mode'),
+    (emoji: '', label: 'Maison'),
+    (emoji: '', label: 'Auto'),
+    (emoji: '', label: 'Beauté'),
+    (emoji: '',  label: 'High-tech'),
+    (emoji: '', label: 'Sport'),
+    (emoji: '', label: 'Livres'),
   ];
 
   static const _etats = ['Neuf', 'Comme neuf', 'Bon état', 'Correct'];
@@ -47,7 +47,7 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       appBar: CreationAppBar(
         title: 'Nouvelle annonce',
         onBack: () => Navigator.of(context).pop(),
@@ -58,11 +58,11 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Barre de progression ─────────────────────────────────────
+            //  Barre de progression 
             CreationStepBar(current: 2, total: 3),
             const SizedBox(height: 20),
 
-            // ── Étape label ──────────────────────────────────────────────
+            //  Étape label 
             const Text('ÉTAPE 2 SUR 3',
                 style: TextStyle(
                     fontSize: 11,
@@ -71,7 +71,7 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
                     color: VAColors.primary)),
             const SizedBox(height: 6),
 
-            // ── Titre ────────────────────────────────────────────────────
+            //  Titre 
             RichText(
               text: const TextSpan(
                 style: TextStyle(fontFamily: 'Poppins', fontSize: 26,
@@ -84,7 +84,7 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
             ),
             const SizedBox(height: 22),
 
-            // ── Formulaire dans une carte blanche ────────────────────────
+            //  Formulaire dans une carte blanche 
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -177,7 +177,7 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
         ),
       ),
 
-      // ── Bottom bar ───────────────────────────────────────────────────
+      //  Bottom bar 
       bottomNavigationBar: CreationBottomBar(
         onBack: () => Navigator.of(context).pop(),
         onNext: () => Navigator.of(context).push(
@@ -188,9 +188,9 @@ class _VendreFormScreenState extends State<VendreFormScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  COMPOSANTS DU FORMULAIRE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _FormField extends StatelessWidget {
   final String label;
@@ -210,7 +210,7 @@ class _FormField extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w700, color: VAColors.black)),
             if (required)
-              const Text(' *',
+              const Text('*',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: VAColors.primary)),
           ],
         ),
@@ -230,7 +230,7 @@ class _Divider extends StatelessWidget {
       const Divider(height: 1, color: VAColors.greyBorder);
 }
 
-// ── Champ texte ─────────────────────────────────────────────────────────────
+//  Champ texte 
 
 class _TextInput extends StatelessWidget {
   final TextEditingController controller;
@@ -274,7 +274,7 @@ class _TextInput extends StatelessWidget {
   }
 }
 
-// ── Chips catégorie ──────────────────────────────────────────────────────────
+//  Chips catégorie 
 
 class _CatChips extends StatelessWidget {
   final List<({String emoji, String label})> items;
@@ -298,7 +298,7 @@ class _CatChips extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: isSel ? VAColors.primaryLight : const Color(0xFFF5F3EF),
+                color: isSel ? VAColors.primaryLight : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSel ? VAColors.primary : VAColors.greyBorder,
@@ -308,8 +308,6 @@ class _CatChips extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(items[i].emoji, style: const TextStyle(fontSize: 13)),
-                  const SizedBox(width: 5),
                   Text(items[i].label,
                       style: TextStyle(
                           fontSize: 12,
@@ -325,7 +323,7 @@ class _CatChips extends StatelessWidget {
   }
 }
 
-// ── Chips état ───────────────────────────────────────────────────────────────
+//  Chips état 
 
 class _EtatChips extends StatelessWidget {
   final List<String> items;
@@ -346,7 +344,7 @@ class _EtatChips extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: isSel ? VAColors.primaryLight : const Color(0xFFF5F3EF),
+              color: isSel ? VAColors.primaryLight : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSel ? VAColors.primary : VAColors.greyBorder,

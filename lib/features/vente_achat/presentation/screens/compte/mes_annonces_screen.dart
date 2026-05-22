@@ -41,7 +41,7 @@ class _MesAnnoncesScreenState extends State<MesAnnoncesScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(
         title: 'Mes annonces',
         actions: [IconButton(icon: const Icon(Icons.search_rounded), onPressed: () {})],

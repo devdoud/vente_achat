@@ -30,7 +30,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(title: 'Évaluation'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(VAPadding.base),

@@ -4,9 +4,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../theme/va_theme.dart';
 import 'creation_annonce_photos_screen.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ATELIER — HUB VENDEUR
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class BoutiqueAtelierScreen extends StatefulWidget {
   final String nom;
@@ -33,7 +33,7 @@ class _BoutiqueAtelierScreenState extends State<BoutiqueAtelierScreen> {
   XFile? _logo;
   final _picker = ImagePicker();
 
-  // ── Constantes de mise en page ─────────────────────────────────────────
+  //  Constantes de mise en page 
   static const double _coverH        = 185.0;
   static const double _logoSize      = 70.0;
   static const double _logoHalf      = _logoSize / 2;
@@ -78,11 +78,11 @@ class _BoutiqueAtelierScreenState extends State<BoutiqueAtelierScreen> {
         .clamp(statusH + 8.0, _coverH - _logoHalf);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
 
-          // ── ① Couverture (fond fixe, derrière le scroll) ──────────────
+          //   Couverture (fond fixe, derrière le scroll) 
           Positioned(
             top: 0, left: 0, right: 0,
             child: _CoverZone(
@@ -93,7 +93,7 @@ class _BoutiqueAtelierScreenState extends State<BoutiqueAtelierScreen> {
             ),
           ),
 
-          // ── ② Contenu scrollable ───────────────────────────────────────
+          //   Contenu scrollable 
           CustomScrollView(
             controller: _scrollController,
             physics: const BouncingScrollPhysics(),
@@ -127,7 +127,7 @@ class _BoutiqueAtelierScreenState extends State<BoutiqueAtelierScreen> {
             ],
           ),
 
-          // ── ③ Logo (animé : descend au scroll) ─────────────────────────
+          //   Logo (animé : descend au scroll) 
           Positioned(
             top: logoY,
             left: 16,
@@ -141,7 +141,7 @@ class _BoutiqueAtelierScreenState extends State<BoutiqueAtelierScreen> {
             ),
           ),
 
-          // ── ④ Boutons actions (toujours épinglés en haut à droite) ──────
+          //   Boutons actions (toujours épinglés en haut à droite) 
           Positioned(
             top: statusH + 10,
             right: 14,
@@ -161,9 +161,9 @@ class _BoutiqueAtelierScreenState extends State<BoutiqueAtelierScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  COUVERTURE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _CoverZone extends StatelessWidget {
   final XFile? cover;
@@ -273,9 +273,9 @@ class _CoverZone extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CARTE IDENTITÉ (nom + chips + stats, par-dessus la couverture)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _IdentityCard extends StatelessWidget {
   final String nom, ville, quartier;
@@ -360,7 +360,7 @@ class _IdentityCard extends StatelessWidget {
                         icon: Icons.place_outlined,
                         iconColor: VAColors.grey,
                         label:
-                            '$quartier${ville.isNotEmpty ? ', $ville' : ''}',
+                            '$quartier${ville.isNotEmpty ? ', $ville': ''}',
                         bg: const Color(0xFFF0EDE8),
                         textColor: VAColors.greyText,
                       ),
@@ -389,9 +389,9 @@ class _IdentityCard extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  LOGO CIRCULAIRE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _LogoCircle extends StatelessWidget {
   final double size;
@@ -423,10 +423,9 @@ class _LogoCircle extends StatelessWidget {
                 ? Image.file(File(image!.path), fit: BoxFit.cover)
                 : Container(
                     color: VAColors.primaryLight,
-                    child: Center(
-                        child: Text(emoji,
-                            style:
-                                TextStyle(fontSize: size * 0.44))),
+                    child: const Center(
+                        child: Icon(Icons.storefront_outlined,
+                            color: VAColors.primaryDark, size: 28)),
                   ),
           ),
         ),
@@ -448,9 +447,9 @@ class _LogoCircle extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  MICRO-WIDGETS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _CircleBtn extends StatelessWidget {
   final IconData icon;
@@ -563,9 +562,9 @@ class _StatDivider extends StatelessWidget {
       Container(width: 1, height: 40, color: const Color(0xFFF0F0F0));
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  PREMIER PAS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _PremierPas extends StatelessWidget {
   @override
@@ -594,7 +593,7 @@ class _PremierPas extends StatelessWidget {
                     color: VAColors.primaryLight,
                     borderRadius: BorderRadius.circular(12)),
                 child: const Center(
-                    child: Text('🚀', style: TextStyle(fontSize: 20))),
+                    child: Icon(Icons.rocket_launch_outlined, size: 20, color: VAColors.primaryDark)),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -649,9 +648,9 @@ class _PremierPas extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  PARAMÈTRES BOUTIQUE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _BoutiqueSettings extends StatelessWidget {
   final String quartier, ville;
@@ -690,7 +689,7 @@ class _BoutiqueSettings extends StatelessWidget {
           child: Column(
             children: [
               _SettingRow(
-                icon: '🖼️',
+                icon: '',
                 iconBg: const Color(0xFFE8F5E9),
                 title: 'Photo de profil & couverture',
                 sub: 'Rassurez vos acheteurs',
@@ -698,7 +697,7 @@ class _BoutiqueSettings extends StatelessWidget {
               ),
               _SDivider(),
               _SettingRow(
-                icon: '📝',
+                icon: '',
                 iconBg: const Color(0xFFE3F2FD),
                 title: 'Description de la boutique',
                 sub: 'Présentez ce que vous vendez',
@@ -706,7 +705,7 @@ class _BoutiqueSettings extends StatelessWidget {
               ),
               _SDivider(),
               _SettingRow(
-                icon: '📍',
+                icon: '',
                 iconBg: const Color(0xFFFFF8E1),
                 title: 'Lieu de retrait',
                 sub: location,
@@ -715,7 +714,7 @@ class _BoutiqueSettings extends StatelessWidget {
               ),
               _SDivider(),
               _SettingRow(
-                icon: '🔗',
+                icon: '',
                 iconBg: const Color(0xFFF3E5F5),
                 title: 'Partager ma boutique',
                 sub: 'WhatsApp, réseaux sociaux…',
@@ -807,9 +806,9 @@ class _SDivider extends StatelessWidget {
       const Divider(height: 1, indent: 66, color: Color(0xFFF0F0F0));
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  MES ANNONCES
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _MesAnnonces extends StatelessWidget {
   @override
@@ -940,9 +939,9 @@ class _MiniCard extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  BARRE PUBLIER
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _PublierBar extends StatelessWidget {
   @override
@@ -950,7 +949,7 @@ class _PublierBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
       decoration: const BoxDecoration(
-        color: Color(0xFFF5F3EF),
+        color: Colors.white,
         border: Border(top: BorderSide(color: Color(0xFFEEEBE4))),
       ),
       child: GestureDetector(

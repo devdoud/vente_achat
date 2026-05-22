@@ -13,27 +13,27 @@ const _kBoutiqueVille     = 'boutique_ville';
 const _kBoutiqueQuartier  = 'boutique_quartier';
 const _kBoutiqueAdresse   = 'boutique_adresse';
 
-// ─── Villes béninoises ────────────────────────────────────────────────────────
+//  Villes béninoises 
 const _villes = [
   'Cotonou', 'Abomey-Calavi', 'Porto-Novo',
   'Parakou', 'Bohicon', 'Lokossa', 'Ouidah', 'Natitingou',
 ];
 
-// ─── Icônes boutique avec palette de couleurs ─────────────────────────────────
+//  Icônes boutique avec palette de couleurs 
 const _logos = [
-  (e: '🛍',  l: 'Boutique',   bg: Color(0xFFFFF3E0), ring: Color(0xFFFF6D00)),
-  (e: '📱',  l: 'Téléphones', bg: Color(0xFFE3F2FD), ring: Color(0xFF1976D2)),
-  (e: '👜',  l: 'Mode',       bg: Color(0xFFFCE4EC), ring: Color(0xFFE91E63)),
-  (e: '🏠',  l: 'Maison',     bg: Color(0xFFE8F5E9), ring: Color(0xFF388E3C)),
-  (e: '💄',  l: 'Beauté',     bg: Color(0xFFF3E5F5), ring: Color(0xFF8E24AA)),
-  (e: '🖥',  l: 'High-tech',  bg: Color(0xFFE8EAF6), ring: Color(0xFF3949AB)),
-  (e: '⚽',  l: 'Sport',      bg: Color(0xFFF1F8E9), ring: Color(0xFF558B2F)),
-  (e: '📚',  l: 'Livres',     bg: Color(0xFFFFF8E1), ring: Color(0xFFF57F17)),
+  (e: '',  l: 'Boutique',   bg: Color(0xFFFFF3E0), ring: Color(0xFFFF6D00)),
+  (e: '',  l: 'Téléphones', bg: Color(0xFFE3F2FD), ring: Color(0xFF1976D2)),
+  (e: '',  l: 'Mode',       bg: Color(0xFFFCE4EC), ring: Color(0xFFE91E63)),
+  (e: '',  l: 'Maison',     bg: Color(0xFFE8F5E9), ring: Color(0xFF388E3C)),
+  (e: '',  l: 'Beauté',     bg: Color(0xFFF3E5F5), ring: Color(0xFF8E24AA)),
+  (e: '',  l: 'High-tech',  bg: Color(0xFFE8EAF6), ring: Color(0xFF3949AB)),
+  (e: '',  l: 'Sport',      bg: Color(0xFFF1F8E9), ring: Color(0xFF558B2F)),
+  (e: '',  l: 'Livres',     bg: Color(0xFFFFF8E1), ring: Color(0xFFF57F17)),
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉCRAN PRINCIPAL
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class BoutiqueSetupScreen extends StatefulWidget {
   const BoutiqueSetupScreen({super.key});
@@ -45,7 +45,7 @@ class BoutiqueSetupScreen extends StatefulWidget {
 class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
   int    _step     = 0;
   String _nom      = '';
-  String _emoji    = '🛍';
+  String _emoji    = '';
   String _ville    = 'Cotonou';
   String _quartier = '';
   String _adresse  = '';
@@ -123,9 +123,9 @@ class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 1 — IDENTITÉ BOUTIQUE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepIdentite extends StatefulWidget {
   final void Function(String nom, String emoji) onNext;
@@ -152,11 +152,11 @@ class _StepIdentiteState extends State<_StepIdentite> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // ── Progress ────────────────────────────────────────────────
+            //  Progress 
             _SetupHeader(step: 1, onBack: () => Navigator.of(context).pop()),
 
             Expanded(
@@ -224,9 +224,9 @@ class _StepIdentiteState extends State<_StepIdentite> {
                       itemCount: _logos.length,
                       itemBuilder: (_, i) {
                         final item = _logos[i];
-                        final sel = _emoji == item.e;
+                        final sel = _emoji == item.l;
                         return GestureDetector(
-                          onTap: () => setState(() => _emoji = item.e),
+                          onTap: () => setState(() => _emoji = item.l),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -255,8 +255,14 @@ class _StepIdentiteState extends State<_StepIdentite> {
                                   child: AnimatedScale(
                                     scale: sel ? 1.18 : 1.0,
                                     duration: const Duration(milliseconds: 220),
-                                    child: Text(item.e,
-                                        style: const TextStyle(fontSize: 26)),
+                                    child: Text(
+                                      item.l.substring(0, 1),
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        color: sel ? item.ring : VAColors.greyText,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -306,9 +312,9 @@ class _StepIdentiteState extends State<_StepIdentite> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 2 — LIEU DE RETRAIT
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepLieu extends StatefulWidget {
   final String ville;
@@ -349,7 +355,7 @@ class _StepLieuState extends State<_StepLieu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -385,7 +391,7 @@ class _StepLieuState extends State<_StepLieu> {
 
                     // Carte info offre sûre
                     _InfoCard(
-                      icon: '🔒',
+                      icon: '',
                       text: 'Avec l\'Offre sûre, les livreurs récupèrent vos articles directement chez vous.',
                     ),
                     const SizedBox(height: 24),
@@ -487,9 +493,9 @@ class _StepLieuState extends State<_StepLieu> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 3 — PRÊT
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepPret extends StatefulWidget {
   final String nom, emoji, ville, quartier;
@@ -531,7 +537,7 @@ class _StepPretState extends State<_StepPret>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -547,8 +553,15 @@ class _StepPretState extends State<_StepPret>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Icône succès
-                        Text(widget.emoji,
-                            style: const TextStyle(fontSize: 64)),
+                        Container(
+                          width: 72, height: 72,
+                          decoration: BoxDecoration(
+                            color: VAColors.primaryLight,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.storefront_outlined,
+                              size: 36, color: VAColors.primaryDark),
+                        ),
                         const SizedBox(height: 20),
 
                         // Titre
@@ -588,7 +601,7 @@ class _StepPretState extends State<_StepPret>
               ),
             ),
 
-            // ── CGV ─────────────────────────────────────────────────────
+            //  CGV 
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: GestureDetector(
@@ -701,7 +714,7 @@ class _StepPretState extends State<_StepPret>
   }
 }
 
-// ─── Carte récap boutique ─────────────────────────────────────────────────────
+//  Carte récap boutique 
 
 class _RecapCard extends StatelessWidget {
   final String nom, emoji, ville, quartier;
@@ -735,8 +748,8 @@ class _RecapCard extends StatelessWidget {
                   color: VAColors.primaryLight,
                   borderRadius: BorderRadius.circular(13),
                 ),
-                child: Center(child: Text(emoji,
-                    style: const TextStyle(fontSize: 26))),
+                child: const Center(child: Icon(Icons.storefront_outlined,
+                    size: 26, color: VAColors.primaryDark)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -789,9 +802,9 @@ class _RecapCard extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 3 — JUSTIFICATIF PROFESSIONNEL (RCCM)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepRCCM extends StatefulWidget {
   final VoidCallback onBack;
@@ -868,7 +881,7 @@ class _StepRCCMState extends State<_StepRCCM> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -911,7 +924,7 @@ class _StepRCCMState extends State<_StepRCCM> {
 
                     // Info carte
                     _InfoCard(
-                      icon: '✅',
+                      icon: '',
                       text:
                           'Les boutiques vérifiées bénéficient d\'un badge de confiance visible par tous les acheteurs sur chaque annonce.',
                     ),
@@ -1108,11 +1121,11 @@ class _RCCMSheetOption extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  COMPOSANTS PARTAGÉS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
-// ── Header avec progress et retour ───────────────────────────────────────────
+//  Header avec progress et retour 
 
 class _SetupHeader extends StatelessWidget {
   final int step;
@@ -1128,7 +1141,7 @@ class _SetupHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF5F3EF),
+      color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: Row(
         children: [
@@ -1192,7 +1205,7 @@ class _SetupHeader extends StatelessWidget {
   }
 }
 
-// ── Bouton principal ──────────────────────────────────────────────────────────
+//  Bouton principal 
 
 class _SetupCTA extends StatelessWidget {
   final String label;
@@ -1230,7 +1243,7 @@ class _SetupCTA extends StatelessWidget {
       );
 }
 
-// ── Label de champ ────────────────────────────────────────────────────────────
+//  Label de champ 
 
 class _Label extends StatelessWidget {
   final String text;
@@ -1242,7 +1255,7 @@ class _Label extends StatelessWidget {
           fontSize: 13, fontWeight: FontWeight.w700, color: VAColors.black));
 }
 
-// ── Carte d'input (fond blanc, arrondis) ──────────────────────────────────────
+//  Carte d'input (fond blanc, arrondis) 
 
 class _InputCard extends StatelessWidget {
   final Widget child;
@@ -1263,7 +1276,7 @@ class _InputCard extends StatelessWidget {
       );
 }
 
-// ── Carte info ────────────────────────────────────────────────────────────────
+//  Carte info 
 
 class _InfoCard extends StatelessWidget {
   final String icon, text;

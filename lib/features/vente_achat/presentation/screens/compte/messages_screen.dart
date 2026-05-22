@@ -23,7 +23,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     final nonLus = conversations.where((c) => c.nonLus > 0).length;
 
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(
         title: 'Messages',
         showBack: false,

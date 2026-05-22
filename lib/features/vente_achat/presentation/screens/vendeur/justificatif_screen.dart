@@ -6,9 +6,9 @@ import '../../../domain/export.dart';
 import 'annonce_publiee_screen.dart';
 import 'creation_widgets.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  JUSTIFICATIF + CGV — Étape 3/3 du parcours particulier
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class JustificatifScreen extends StatefulWidget {
   const JustificatifScreen({super.key});
@@ -62,7 +62,7 @@ class _JustificatifScreenState extends State<JustificatifScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       appBar: CreationAppBar(
         title: 'Nouvelle annonce',
         onBack: () => Navigator.of(context).pop(),
@@ -103,7 +103,7 @@ class _JustificatifScreenState extends State<JustificatifScreen> {
             ),
             const SizedBox(height: 26),
 
-            // ── Section justificatif ────────────────────────────────────
+            //  Section justificatif 
             _SectionHeader(
                 title: 'Justificatif de possession',
                 badge: 'OPTIONNEL'),
@@ -123,13 +123,13 @@ class _JustificatifScreenState extends State<JustificatifScreen> {
 
             const SizedBox(height: 12),
             _InfoNote(
-              icon: '💡',
+              icon: '',
               text:
                   'Les annonces avec justificatif se vendent 3× plus vite et inspirent davantage confiance aux acheteurs.',
             ),
             const SizedBox(height: 28),
 
-            // ── Section CGV ─────────────────────────────────────────────
+            //  Section CGV 
             _SectionHeader(title: 'Conditions de vente', badge: 'REQUIS'),
             const SizedBox(height: 12),
 
@@ -206,15 +206,15 @@ class _JustificatifScreenState extends State<JustificatifScreen> {
         onBack: () => Navigator.of(context).pop(),
         onNext: _publish,
         canContinue: _cgv,
-        nextLabel: 'Publier mon annonce 🎉',
+        nextLabel: 'Publier mon annonce ',
       ),
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  COMPOSANTS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _DocPickerSheet extends StatelessWidget {
   final VoidCallback onCamera, onGallery;

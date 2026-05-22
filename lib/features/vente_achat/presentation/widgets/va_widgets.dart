@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/va_theme.dart';
 import '../../domain/vendeur.dart';
 
-// ──────────────────────────── AppBar ────────────────────────────
+//  AppBar 
 
 class VAAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -59,7 +59,7 @@ class VAAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
 }
 
-// ──────────────────────────── Avatar vendeur ────────────────────────────
+//  Avatar vendeur 
 
 class VAAvatarVendeur extends StatelessWidget {
   final Vendeur vendeur;
@@ -105,7 +105,7 @@ class VAAvatarVendeur extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Badge PRO ────────────────────────────
+//  Badge PRO 
 
 class VAProBadge extends StatelessWidget {
   const VAProBadge({super.key});
@@ -130,7 +130,7 @@ class VAProBadge extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Bouton primaire plein ────────────────────────────
+//  Bouton primaire plein 
 
 class VAPrimaryButton extends StatelessWidget {
   final String label;
@@ -179,7 +179,7 @@ class VAPrimaryButton extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Bouton secondaire ────────────────────────────
+//  Bouton secondaire 
 
 class VAOutlineButton extends StatelessWidget {
   final String label;
@@ -211,7 +211,7 @@ class VAOutlineButton extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Chip filtre ────────────────────────────
+//  Chip filtre 
 
 class VAFilterChip extends StatelessWidget {
   final String label;
@@ -271,7 +271,7 @@ class VAFilterChip extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Stats row ────────────────────────────
+//  Stats row 
 
 class VAStatItem extends StatelessWidget {
   final String value;
@@ -291,7 +291,7 @@ class VAStatItem extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Étoiles ────────────────────────────
+//  Étoiles 
 
 class VAStars extends StatelessWidget {
   final double note;
@@ -320,7 +320,7 @@ class VAStars extends StatelessWidget {
   }
 }
 
-// ──────────────────────────── Section header ────────────────────────────
+//  Section header 
 
 class VASectionLabel extends StatelessWidget {
   final String text;

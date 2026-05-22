@@ -113,10 +113,6 @@ class _SuccessAnimation extends StatelessWidget {
             ),
             child: const Icon(Icons.check_rounded, color: Colors.white, size: 52),
           ),
-          Positioned(top: 8, left: 16, child: Text('🎉', style: const TextStyle(fontSize: 22))),
-          Positioned(top: 8, right: 16, child: Text('⭐', style: const TextStyle(fontSize: 18))),
-          Positioned(bottom: 8, left: 8, child: Text('🎊', style: const TextStyle(fontSize: 20))),
-          Positioned(bottom: 12, right: 12, child: Text('✨', style: const TextStyle(fontSize: 16))),
         ],
       ),
     );

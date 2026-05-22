@@ -7,7 +7,7 @@ import 'annonces_feed_screen.dart';
 import 'search_screen.dart';
 import '../compte/filtres_screen.dart';
 
-// ─── Données statiques ────────────────────────────────────────────────────────
+//  Données statiques 
 
 class _Cat {
   final String emoji;
@@ -18,21 +18,21 @@ class _Cat {
 }
 
 const _cats = [
-  _Cat('📱', 'Téléphones', Color(0xFFD6EBFF), AnnonceCategorie.telephones),
-  _Cat('👜', 'Mode',       Color(0xFFFFDDE9), AnnonceCategorie.mode),
-  _Cat('🏠', 'Maison',     Color(0xFFD9F2DD), AnnonceCategorie.maison),
-  _Cat('🚗', 'Auto',       Color(0xFFFFF0C2), AnnonceCategorie.auto),
-  _Cat('💄', 'Beauté',     Color(0xFFF0DCF9), AnnonceCategorie.beaute),
-  _Cat('🖥',  'High-tech', Color(0xFFD4F0FC), AnnonceCategorie.hightech),
-  _Cat('⚽', 'Sport',      Color(0xFFD6F5E3), AnnonceCategorie.sport),
-  _Cat('📚', 'Livres',     Color(0xFFFFEBCC), AnnonceCategorie.livres),
+  _Cat('', 'Téléphones', Color(0xFFD6EBFF), AnnonceCategorie.telephones),
+  _Cat('', 'Mode',       Color(0xFFFFDDE9), AnnonceCategorie.mode),
+  _Cat('', 'Maison',     Color(0xFFD9F2DD), AnnonceCategorie.maison),
+  _Cat('', 'Auto',       Color(0xFFFFF0C2), AnnonceCategorie.auto),
+  _Cat('', 'Beauté',     Color(0xFFF0DCF9), AnnonceCategorie.beaute),
+  _Cat('',  'High-tech', Color(0xFFD4F0FC), AnnonceCategorie.hightech),
+  _Cat('', 'Sport',      Color(0xFFD6F5E3), AnnonceCategorie.sport),
+  _Cat('', 'Livres',     Color(0xFFFFEBCC), AnnonceCategorie.livres),
 ];
 
 
 // Cycle de hauteurs d'images pour l'effet staggeré
 const _imgH = [146.0, 108.0, 128.0, 116.0, 142.0, 104.0, 134.0, 118.0];
 
-// ─── Écran principal ─────────────────────────────────────────────────────────
+//  Écran principal 
 
 @RoutePage()
 class VAHomeScreen extends StatelessWidget {
@@ -42,7 +42,7 @@ class VAHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final all = AnnoncesMock.all;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -62,9 +62,9 @@ class VAHomeScreen extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  HEADER
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _Header extends StatelessWidget {
   @override
@@ -123,9 +123,9 @@ class _LocationChip extends StatelessWidget {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  SEARCH
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _SearchBar extends StatelessWidget {
   void _openSearch(BuildContext context) => Navigator.of(context).push(
@@ -191,9 +191,9 @@ class _SearchBar extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  TRUST STRIP (une ligne)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _TrustStrip extends StatelessWidget {
   static const _items = [
@@ -236,9 +236,9 @@ class _TrustStrip extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  SPOTLIGHT — carrousel horizontal avec gradient overlay
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _SpotlightSection extends StatelessWidget {
   final List<Annonce> annonces;
@@ -254,13 +254,12 @@ class _SpotlightSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
           child: Row(
             children: [
-              const Text('À ne pas rater 🎯',
+              const Text('À ne pas rater ',
                   style: TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w900, color: VAColors.black, letterSpacing: -0.3)),
               const Spacer(),
               GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AnnoncesFeedScreen())),
+                onTap: () {},
                 child: const Text('Tout voir',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: VAColors.primary)),
               ),
@@ -357,7 +356,7 @@ class _SpotlightCardState extends State<_SpotlightCard> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: VAColors.primary, borderRadius: BorderRadius.circular(20)),
-                  child: const Text('✓ Pro',
+                  child: const Text('Pro',
                       style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
                 ),
               ),
@@ -432,9 +431,9 @@ class _SpotlightCardState extends State<_SpotlightCard> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CATEGORIES — scroll horizontal premium
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _CategoriesSection extends StatelessWidget {
   @override
@@ -446,10 +445,9 @@ class _CategoriesSection extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         children: [
-          // ── Chip "Tout" actif (orange) ────────────────────────────────
+          //  Chip "Tout" actif (orange) — pas de navigation, déjà sur l'écran principal
           GestureDetector(
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const AnnoncesFeedScreen())),
+            onTap: () {},
             child: Container(
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -477,7 +475,7 @@ class _CategoriesSection extends StatelessWidget {
             ),
           ),
 
-          // ── Chips catégories ──────────────────────────────────────────
+          //  Chips catégories 
           for (final c in _cats)
             GestureDetector(
               onTap: () => Navigator.of(context).push(
@@ -523,9 +521,9 @@ class _CategoriesSection extends StatelessWidget {
 
 
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  MASONRY INFINI — 8 sections thématiques × 6 produits
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _InfiniteMasonryFeed extends StatelessWidget {
   final List<Annonce> annonces;
@@ -548,14 +546,14 @@ class _InfiniteMasonryFeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sections = [
-      (icon: '📱', title: 'Téléphones & Tech',    items: _pick(cats: [AnnonceCategorie.telephones, AnnonceCategorie.hightech])),
-      (icon: '💰', title: 'Petits prix du moment', items: _pick(maxPrix: 150000)),
-      (icon: '👜', title: 'Mode & Style',           items: _pick(cats: [AnnonceCategorie.mode, AnnonceCategorie.beaute])),
+      (icon: '', title: 'Téléphones & Tech',    items: _pick(cats: [AnnonceCategorie.telephones, AnnonceCategorie.hightech])),
+      (icon: '', title: 'Petits prix du moment', items: _pick(maxPrix: 150000)),
+      (icon: '', title: 'Mode & Style',           items: _pick(cats: [AnnonceCategorie.mode, AnnonceCategorie.beaute])),
       (icon: '⭐', title: 'Bonnes affaires',        items: _pick(remiseOnly: true)),
-      (icon: '🏠', title: 'Maison & Auto',          items: _pick(cats: [AnnonceCategorie.maison, AnnonceCategorie.auto])),
-      (icon: '🆕', title: 'Derniers arrivages',     items: _pick(recentFirst: true)),
-      (icon: '✅', title: 'Vendeurs certifiés',     items: _pick(proOnly: true)),
-      (icon: '⚽', title: 'Sport & Loisirs',        items: _pick(cats: [AnnonceCategorie.sport, AnnonceCategorie.livres])),
+      (icon: '', title: 'Maison & Auto',          items: _pick(cats: [AnnonceCategorie.maison, AnnonceCategorie.auto])),
+      (icon: '', title: 'Derniers arrivages',     items: _pick(recentFirst: true)),
+      (icon: '', title: 'Vendeurs certifiés',     items: _pick(proOnly: true)),
+      (icon: '', title: 'Sport & Loisirs',        items: _pick(cats: [AnnonceCategorie.sport, AnnonceCategorie.livres])),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -700,7 +698,7 @@ class _PinCardState extends State<_PinCard> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(color: VAColors.primary, borderRadius: BorderRadius.circular(20)),
-                      child: const Text('✓ Pro',
+                      child: const Text('Pro',
                           style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
                     )),
                 Positioned(top: 6, right: 6,
@@ -779,9 +777,9 @@ class _PinCardState extends State<_PinCard> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  UTILITAIRES
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 Color _catColor(AnnonceCategorie cat) => switch (cat) {
       AnnonceCategorie.telephones => const Color(0xFFD6EBFF),

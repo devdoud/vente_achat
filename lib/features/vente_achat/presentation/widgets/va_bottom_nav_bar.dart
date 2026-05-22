@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/va_theme.dart';
 
-// ─── Données statiques des onglets ────────────────────────────────────────────
+//  Données statiques des onglets 
 class _Tab {
   final IconData icon;
   final IconData activeIcon;
@@ -16,7 +16,7 @@ const _tabs = [
   _Tab(Icons.favorite_border_rounded,    Icons.favorite_rounded,        'Favoris'),
 ];
 
-// ─── Widget principal ─────────────────────────────────────────────────────────
+//  Widget principal 
 class VABottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -61,7 +61,7 @@ class VABottomNavBar extends StatelessWidget {
   }
 }
 
-// ─── Onglet actif : pill orange ───────────────────────────────────────────────
+//  Onglet actif : pill orange 
 class _PillItem extends StatelessWidget {
   final _Tab tab;
   final int index;
@@ -99,7 +99,7 @@ class _PillItem extends StatelessWidget {
   }
 }
 
-// ─── Onglet inactif : icône grise ────────────────────────────────────────────
+//  Onglet inactif : icône grise 
 class _IconItem extends StatelessWidget {
   final _Tab tab;
   final int index;

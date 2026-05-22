@@ -34,7 +34,7 @@ class _BoutiqueProScreenState extends State<BoutiqueProScreen>
   Widget build(BuildContext context) {
     final vendeur = widget.vendeur;
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [
           _CoverAppBar(vendeur: vendeur, isFollowing: _isFollowing, onFollowToggle: () => setState(() => _isFollowing = !_isFollowing)),
@@ -219,7 +219,7 @@ class _StatsCard extends StatelessWidget {
                     _Separator(),
                     _StatCol(value: '${vendeur.produits}', label: 'PRODUITS'),
                     _Separator(),
-                    _StatCol(value: '${vendeur.abonnes != null ? (vendeur.abonnes! >= 1000 ? '${(vendeur.abonnes! / 1000).toStringAsFixed(1)}k' : '${vendeur.abonnes}') : '0'}', label: 'ABONNÉS'),
+                    _StatCol(value: '${vendeur.abonnes != null ? (vendeur.abonnes! >= 1000 ? '${(vendeur.abonnes! / 1000).toStringAsFixed(1)}k': '${vendeur.abonnes}') : '0'}', label: 'ABONNÉS'),
                   ],
                 ),
               ),

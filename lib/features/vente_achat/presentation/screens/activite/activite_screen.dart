@@ -26,7 +26,7 @@ class _ActiviteScreenState extends State<ActiviteScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(
         title: 'Activité',
         showBack: false,

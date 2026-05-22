@@ -10,7 +10,7 @@ import 'annonces_feed_screen.dart';
 // Hauteurs d'image pour l'effet staggeré (identique à l'écran Acheter)
 const _dImgH = [146.0, 108.0, 128.0, 116.0, 142.0, 104.0, 134.0, 118.0];
 
-// ─── Couleur de fond par catégorie ───────────────────────────────────────────
+//  Couleur de fond par catégorie 
 
 Color _bgColor(AnnonceCategorie c) => switch (c) {
       AnnonceCategorie.telephones => const Color(0xFFD6EBFF),
@@ -23,7 +23,7 @@ Color _bgColor(AnnonceCategorie c) => switch (c) {
       AnnonceCategorie.livres     => const Color(0xFFFFEBCC),
     };
 
-// ─── Écran principal ─────────────────────────────────────────────────────────
+//  Écran principal 
 
 @RoutePage()
 class AnnonceDetailScreen extends StatefulWidget {
@@ -54,10 +54,10 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
-          // ── Carrousel image ────────────────────────────────────────────
+          //  Carrousel image 
           SliverToBoxAdapter(
             child: _ImageCarousel(
               annonce: a,
@@ -68,16 +68,16 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
             ),
           ),
 
-          // ── Prix + titre + méta ────────────────────────────────────────
+          //  Prix + titre + méta 
           SliverToBoxAdapter(child: _InfoSection(annonce: a)),
 
-          // ── Bannière offre sûre ────────────────────────────────────────
+          //  Bannière offre sûre 
           const SliverToBoxAdapter(child: _TrustBanner()),
 
-          // ── Vendeur ────────────────────────────────────────────────────
+          //  Vendeur 
           SliverToBoxAdapter(child: _SellerSection(vendeur: a.vendeur)),
 
-          // ── Détails + description ──────────────────────────────────────
+          //  Détails + description 
           SliverToBoxAdapter(
             child: _DetailsSection(
               annonce: a,
@@ -86,7 +86,7 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
             ),
           ),
 
-          // ── Produits du même vendeur ───────────────────────────────────
+          //  Produits du même vendeur 
           if (similar.isNotEmpty)
             SliverToBoxAdapter(
               child: _ProductHScroll(
@@ -95,7 +95,7 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
               ),
             ),
 
-          // ── Articles similaires ────────────────────────────────────────
+          //  Articles similaires 
           SliverToBoxAdapter(
             child: _ProductHScroll(
               title: 'Articles similaires',
@@ -106,7 +106,7 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
             ),
           ),
 
-          // ── Cela pourrait vous intéresser ──────────────────────────────
+          //  Cela pourrait vous intéresser 
           if (related.isNotEmpty)
             SliverToBoxAdapter(
               child: _ProductHScroll(
@@ -115,7 +115,7 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
               ),
             ),
 
-          // ── Mêmes sections que l'écran Acheter ────────────────────────
+          //  Mêmes sections que l'écran Acheter 
           SliverToBoxAdapter(
             child: _DetailMasonryFeed(
               annonces: AnnoncesMock.all,
@@ -131,9 +131,9 @@ class _AnnonceDetailScreenState extends State<AnnonceDetailScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CARROUSEL IMAGE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _ImageCarousel extends StatelessWidget {
   final Annonce annonce;
@@ -161,7 +161,7 @@ class _ImageCarousel extends StatelessWidget {
       height: 320,
       child: Stack(
         children: [
-          // ── PageView ─────────────────────────────────────────────────
+          //  PageView 
           PageView.builder(
             itemCount: _pageCount,
             onPageChanged: onPageChanged,
@@ -180,7 +180,7 @@ class _ImageCarousel extends StatelessWidget {
             },
           ),
 
-          // ── Bouton retour ────────────────────────────────────────────
+          //  Bouton retour 
           Positioned(
             top: top + 10,
             left: 14,
@@ -190,7 +190,7 @@ class _ImageCarousel extends StatelessWidget {
             ),
           ),
 
-          // ── Favori + partage ─────────────────────────────────────────
+          //  Favori + partage 
           Positioned(
             top: top + 10,
             right: 14,
@@ -207,7 +207,7 @@ class _ImageCarousel extends StatelessWidget {
             ),
           ),
 
-          // ── Badge remise ─────────────────────────────────────────────
+          //  Badge remise 
           if (annonce.remisePourcent != null)
             Positioned(
               top: top + 10,
@@ -222,7 +222,7 @@ class _ImageCarousel extends StatelessWidget {
               ),
             ),
 
-          // ── Indicateur dots ──────────────────────────────────────────
+          //  Indicateur dots 
           Positioned(
             bottom: 14,
             left: 0,
@@ -242,7 +242,7 @@ class _ImageCarousel extends StatelessWidget {
             ),
           ),
 
-          // ── Compteur pages ───────────────────────────────────────────
+          //  Compteur pages 
           Positioned(
             bottom: 14,
             right: 14,
@@ -283,9 +283,9 @@ class _CircleBtn extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  INFO — prix, titre, méta
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _InfoSection extends StatelessWidget {
   final Annonce annonce;
@@ -300,7 +300,7 @@ class _InfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Badge état (ligne seule, pas de compétition horizontale) ───
+          //  Badge état (ligne seule, pas de compétition horizontale) 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -314,7 +314,7 @@ class _InfoSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // ── Prix + ancienPrix + badge remise ───────────────────────────
+          //  Prix + ancienPrix + badge remise 
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.end,
             spacing: 8,
@@ -350,7 +350,7 @@ class _InfoSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // ── Titre ───────────────────────────────────────────────────────
+          //  Titre 
           Text(
             annonce.titre,
             style: const TextStyle(
@@ -358,7 +358,7 @@ class _InfoSection extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // ── Méta ────────────────────────────────────────────────────────
+          //  Méta 
           Wrap(
             spacing: 12,
             runSpacing: 4,
@@ -391,9 +391,9 @@ class _MetaChip extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  BANNIÈRE OFFRE SÛRE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _TrustBanner extends StatelessWidget {
   const _TrustBanner();
@@ -436,9 +436,9 @@ class _TrustBanner extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  SECTION VENDEUR
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _SellerSection extends StatelessWidget {
   final Vendeur vendeur;
@@ -456,7 +456,7 @@ class _SellerSection extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Identité vendeur ─────────────────────────────────────────
+          //  Identité vendeur 
           Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
@@ -484,8 +484,8 @@ class _SellerSection extends StatelessWidget {
                       Row(
                         children: [
                           const Icon(Icons.star_rounded, color: VAColors.star, size: 13),
-                          Text(' ${vendeur.note}', style: const TextStyle(fontSize: 12, color: VAColors.greyText)),
-                          Text(' · ${vendeur.ventes} évaluations',
+                          Text('${vendeur.note}', style: const TextStyle(fontSize: 12, color: VAColors.greyText)),
+                          Text('· ${vendeur.ventes} évaluations',
                               style: const TextStyle(fontSize: 12, color: VAColors.grey)),
                         ],
                       ),
@@ -497,7 +497,7 @@ class _SellerSection extends StatelessWidget {
             ),
           ),
 
-          // ── Stats ────────────────────────────────────────────────────
+          //  Stats 
           Container(
             decoration: const BoxDecoration(
               border: Border(top: BorderSide(color: VAColors.greyBorder)),
@@ -515,7 +515,7 @@ class _SellerSection extends StatelessWidget {
             ),
           ),
 
-          // ── Bouton boutique ──────────────────────────────────────────
+          //  Bouton boutique 
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             child: GestureDetector(
@@ -572,9 +572,9 @@ class _VDivider extends StatelessWidget {
       Container(width: 1, height: 32, color: VAColors.greyBorder);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  DÉTAILS + DESCRIPTION
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _DetailsSection extends StatelessWidget {
   final Annonce annonce;
@@ -616,7 +616,7 @@ class _DetailsSection extends StatelessWidget {
             GestureDetector(
               onTap: onToggle,
               child: Text(
-                expanded ? 'Voir moins ▲' : 'Voir plus ▼',
+                expanded ? 'Voir moins ': 'Voir plus ',
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: VAColors.primary),
               ),
             ),
@@ -650,9 +650,9 @@ class _DetailRow extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  SCROLL HORIZONTAL DE PRODUITS (réutilisable)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _ProductHScroll extends StatelessWidget {
   final String title;
@@ -809,17 +809,17 @@ class _MiniCardState extends State<_MiniCard> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  BOTTOM BAR — Ajouter panier + Acheter
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CATÉGORIES (scroll horizontal — mêmes que l'écran Acheter)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  MASONRY THÉMATIQUE — mêmes sections que l'écran Acheter
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _DetailMasonryFeed extends StatelessWidget {
   final List<Annonce> annonces;
@@ -845,14 +845,14 @@ class _DetailMasonryFeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sections = [
-      (icon: '📱', title: 'Téléphones & Tech',    items: _pick(cats: [AnnonceCategorie.telephones, AnnonceCategorie.hightech])),
-      (icon: '💰', title: 'Petits prix du moment', items: _pick(maxPrix: 150000)),
-      (icon: '👜', title: 'Mode & Style',           items: _pick(cats: [AnnonceCategorie.mode, AnnonceCategorie.beaute])),
+      (icon: '', title: 'Téléphones & Tech',    items: _pick(cats: [AnnonceCategorie.telephones, AnnonceCategorie.hightech])),
+      (icon: '', title: 'Petits prix du moment', items: _pick(maxPrix: 150000)),
+      (icon: '', title: 'Mode & Style',           items: _pick(cats: [AnnonceCategorie.mode, AnnonceCategorie.beaute])),
       (icon: '⭐', title: 'Bonnes affaires',        items: _pick(remiseOnly: true)),
-      (icon: '🏠', title: 'Maison & Auto',          items: _pick(cats: [AnnonceCategorie.maison, AnnonceCategorie.auto])),
-      (icon: '🆕', title: 'Derniers arrivages',     items: _pick(recentFirst: true)),
-      (icon: '✅', title: 'Vendeurs certifiés',     items: _pick(proOnly: true)),
-      (icon: '⚽', title: 'Sport & Loisirs',        items: _pick(cats: [AnnonceCategorie.sport, AnnonceCategorie.livres])),
+      (icon: '', title: 'Maison & Auto',          items: _pick(cats: [AnnonceCategorie.maison, AnnonceCategorie.auto])),
+      (icon: '', title: 'Derniers arrivages',     items: _pick(recentFirst: true)),
+      (icon: '', title: 'Vendeurs certifiés',     items: _pick(proOnly: true)),
+      (icon: '', title: 'Sport & Loisirs',        items: _pick(cats: [AnnonceCategorie.sport, AnnonceCategorie.livres])),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -972,7 +972,7 @@ class _DPinCardState extends State<_DPinCard> {
                 Positioned(top: 7, left: 7, child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(color: VAColors.primary, borderRadius: BorderRadius.circular(20)),
-                  child: const Text('✓ Pro',
+                  child: const Text('Pro',
                       style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)))),
               Positioned(top: 6, right: 6, child: GestureDetector(
                 onTap: () => setState(() => _fav = !_fav),
@@ -1039,10 +1039,10 @@ class _BottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
-      color: const Color(0xFFF5F3EF),
+      color: Colors.white,
       child: Row(
         children: [
-          // ── Ajouter au panier ────────────────────────────────────────
+          //  Ajouter au panier 
           Expanded(
             child: GestureDetector(
               onTap: () {},
@@ -1066,7 +1066,7 @@ class _BottomBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // ── Acheter ──────────────────────────────────────────────────
+          //  Acheter 
           Expanded(
             child: GestureDetector(
               onTap: () => Navigator.of(context).push(

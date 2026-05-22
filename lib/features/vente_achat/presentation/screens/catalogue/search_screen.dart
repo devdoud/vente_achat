@@ -4,9 +4,9 @@ import '../../../domain/export.dart';
 import '../compte/filtres_screen.dart';
 import 'annonce_detail_screen.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  RECHERCHE — plein écran avec résultats live
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -85,10 +85,10 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final statusH = MediaQuery.of(context).padding.top;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
-          // ── Barre de recherche ─────────────────────────────────────────
+          //  Barre de recherche 
           Container(
             color: Colors.white,
             padding: EdgeInsets.fromLTRB(12, statusH + 8, 12, 12),
@@ -100,7 +100,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F3EF),
+                      color: Colors.white,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -114,7 +114,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Container(
                     height: 46,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F3EF),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(23),
                     ),
                     child: TextField(
@@ -178,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
 
-          // ── Contenu ────────────────────────────────────────────────────
+          //  Contenu 
           Expanded(
             child: _query.isEmpty
                 ? _EmptyState(
@@ -198,9 +198,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAT VIDE — recherches récentes + catégories
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _EmptyState extends StatelessWidget {
   final List<String> recent;
@@ -216,14 +216,14 @@ class _EmptyState extends StatelessWidget {
   });
 
   static const _popularCats = [
-    (emoji: '📱', label: 'Téléphones'),
-    (emoji: '👜', label: 'Mode'),
-    (emoji: '🏠', label: 'Maison'),
-    (emoji: '🚗', label: 'Auto'),
-    (emoji: '💄', label: 'Beauté'),
-    (emoji: '🖥',  label: 'High-tech'),
-    (emoji: '⚽', label: 'Sport'),
-    (emoji: '📚', label: 'Livres'),
+    (emoji: '', label: 'Téléphones'),
+    (emoji: '', label: 'Mode'),
+    (emoji: '', label: 'Maison'),
+    (emoji: '', label: 'Auto'),
+    (emoji: '', label: 'Beauté'),
+    (emoji: '',  label: 'High-tech'),
+    (emoji: '', label: 'Sport'),
+    (emoji: '', label: 'Livres'),
   ];
 
   @override
@@ -298,9 +298,6 @@ class _EmptyState extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(c.emoji,
-                            style: const TextStyle(fontSize: 26)),
-                        const SizedBox(height: 5),
                         Text(
                           c.label,
                           textAlign: TextAlign.center,
@@ -365,9 +362,9 @@ class _RecentChip extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  RÉSULTATS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _ResultsView extends StatelessWidget {
   final String query;
@@ -381,7 +378,8 @@ class _ResultsView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🔍', style: TextStyle(fontSize: 48)),
+            const Icon(Icons.search_off_rounded,
+                size: 52, color: VAColors.greyBorder),
             const SizedBox(height: 16),
             Text('Aucun résultat pour\n"$query"',
                 textAlign: TextAlign.center,
@@ -413,7 +411,7 @@ class _ResultsView extends StatelessWidget {
                   fontSize: 13, color: VAColors.greyText),
               children: [
                 TextSpan(
-                    text: '${results.length} résultat${results.length > 1 ? 's' : ''} ',
+                    text: '${results.length} résultat${results.length > 1 ? 's': ''} ',
                     style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: VAColors.black)),
@@ -513,7 +511,7 @@ class _ResultTile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          annonce.isPro ? 'Pro' : 'Particulier',
+                          annonce.isPro ? 'Pro': 'Particulier',
                           style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,

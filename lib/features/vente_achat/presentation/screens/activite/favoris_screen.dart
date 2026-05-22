@@ -41,7 +41,7 @@ class _FavorisScreenState extends State<FavorisScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: VAColors.background,
+      backgroundColor: Colors.white,
       appBar: VAAppBar(
         title: 'Favoris',
         showBack: false,

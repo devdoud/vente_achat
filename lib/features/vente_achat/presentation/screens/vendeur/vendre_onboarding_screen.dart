@@ -6,22 +6,22 @@ import 'boutique_setup_screen.dart';
 
 const _kOnboardingDone = 'vendre_onboarding_done';
 
-// ─── Données catégories pour l'étape de sélection ────────────────────────────
+//  Données catégories pour l'étape de sélection 
 
 const _onbCats = [
-  (emoji: '📱', label: 'Téléphones',  cat: AnnonceCategorie.telephones),
-  (emoji: '👜', label: 'Mode',        cat: AnnonceCategorie.mode),
-  (emoji: '🏠', label: 'Maison',      cat: AnnonceCategorie.maison),
-  (emoji: '🚗', label: 'Auto',        cat: AnnonceCategorie.auto),
-  (emoji: '💄', label: 'Beauté',      cat: AnnonceCategorie.beaute),
-  (emoji: '🖥',  label: 'High-tech',  cat: AnnonceCategorie.hightech),
-  (emoji: '⚽', label: 'Sport',       cat: AnnonceCategorie.sport),
-  (emoji: '📚', label: 'Livres',      cat: AnnonceCategorie.livres),
+  (emoji: '', label: 'Téléphones',  cat: AnnonceCategorie.telephones),
+  (emoji: '', label: 'Mode',        cat: AnnonceCategorie.mode),
+  (emoji: '', label: 'Maison',      cat: AnnonceCategorie.maison),
+  (emoji: '', label: 'Auto',        cat: AnnonceCategorie.auto),
+  (emoji: '', label: 'Beauté',      cat: AnnonceCategorie.beaute),
+  (emoji: '',  label: 'High-tech',  cat: AnnonceCategorie.hightech),
+  (emoji: '', label: 'Sport',       cat: AnnonceCategorie.sport),
+  (emoji: '', label: 'Livres',      cat: AnnonceCategorie.livres),
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉCRAN PRINCIPAL
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class VendreOnboardingScreen extends StatefulWidget {
   const VendreOnboardingScreen({super.key});
@@ -35,7 +35,7 @@ class _VendreOnboardingState extends State<VendreOnboardingScreen> {
   int _page = 0;
   final Set<AnnonceCategorie> _selCats = {};
 
-  // ── Navigation ─────────────────────────────────────────────────────────
+  //  Navigation 
 
   void _next() {
     if (_page < 2) {
@@ -63,7 +63,7 @@ class _VendreOnboardingState extends State<VendreOnboardingScreen> {
     ));
   }
 
-  // ── Build ───────────────────────────────────────────────────────────────
+  //  Build 
 
   @override
   Widget build(BuildContext context) {
@@ -100,9 +100,9 @@ class _VendreOnboardingState extends State<VendreOnboardingScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 0 — ACCROCHE ÉMOTIONNELLE (fond sombre, typographie géante)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepWelcome extends StatelessWidget {
   final VoidCallback onStart, onSkip;
@@ -164,19 +164,7 @@ class _StepWelcome extends StatelessWidget {
 
               const Spacer(),
 
-              // Illustration emoji empilés
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                child: Stack(
-                  children: [
-                    const Text('💰', style: TextStyle(fontSize: 28)),
-                    const Positioned(left: 36, top: 4, child: Text('📱', style: TextStyle(fontSize: 22))),
-                    const Positioned(left: 68, top: 0, child: Text('👜', style: TextStyle(fontSize: 26))),
-                    const Positioned(left: 106, top: 6, child: Text('🏠', style: TextStyle(fontSize: 20))),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
 
               // Titre principal — style unique, mixte poids léger + gras
               Padding(
@@ -295,9 +283,9 @@ class _StatPill extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 1 — CATÉGORIES
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepCategories extends StatelessWidget {
   final int page, total;
@@ -373,9 +361,9 @@ class _StepCategories extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ÉTAPE 3 — PRÊT À DÉMARRER (fond orange, excitant)
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _StepReady extends StatelessWidget {
   final VoidCallback onFinish;
@@ -436,8 +424,15 @@ class _StepReady extends StatelessWidget {
 
               const Spacer(),
 
-              // Rocket illustration
-              const Text('🚀', style: TextStyle(fontSize: 72)),
+              Container(
+                width: 80, height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.storefront_outlined,
+                    color: Colors.white, size: 38),
+              ),
               const SizedBox(height: 20),
 
               // Titre — décontracté, chaleureux
@@ -475,13 +470,13 @@ class _StepReady extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
                   children: const [
-                    _BenefitRow(icon: '🔒', text: 'Paiement sécurisé pour chaque vente'),
+                    _BenefitRow(icon: '', text: 'Paiement sécurisé pour chaque vente'),
                     SizedBox(height: 12),
-                    _BenefitRow(icon: '🚚', text: 'Livraison intégrée, zéro tracas'),
+                    _BenefitRow(icon: '', text: 'Livraison intégrée, zéro tracas'),
                     SizedBox(height: 12),
-                    _BenefitRow(icon: '👥', text: '+50 000 acheteurs actifs au Bénin'),
+                    _BenefitRow(icon: '', text: '+50 000 acheteurs actifs au Bénin'),
                     SizedBox(height: 12),
-                    _BenefitRow(icon: '📊', text: 'Tableau de bord vendeur complet'),
+                    _BenefitRow(icon: '', text: 'Tableau de bord vendeur complet'),
                   ],
                 ),
               ),
@@ -540,9 +535,9 @@ class _BenefitRow extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CASCADE DE CATÉGORIES — 3 colonnes décalées en cascade diagonale
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 // Distribution: col1 = [0,3,6], col2 = [1,4,7], col3 = [2,5]
 // Décalage vertical:  col1 = 0px, col2 = 28px, col3 = 56px
@@ -624,7 +619,7 @@ class _CatBubble extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Bulle ronde ────────────────────────────────────────────────
+          //  Bulle ronde 
           AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             width: 68,
@@ -653,11 +648,17 @@ class _CatBubble extends StatelessWidget {
                     ],
             ),
             child: Center(
-              child: Text(data.emoji, style: const TextStyle(fontSize: 28)),
+              child: Text(
+                data.label.substring(0, 1).toUpperCase(),
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: VAColors.primaryDark),
+              ),
             ),
           ),
           const SizedBox(height: 7),
-          // ── Label ──────────────────────────────────────────────────────
+          //  Label 
           Text(
             data.label,
             style: TextStyle(
@@ -667,7 +668,7 @@ class _CatBubble extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          // ── Point indicateur de sélection ──────────────────────────────
+          //  Point indicateur de sélection 
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             margin: const EdgeInsets.only(top: 4),
@@ -684,11 +685,11 @@ class _CatBubble extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  COMPOSANTS PARTAGÉS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
-// ── Barre de navigation avec indicateur de progression ───────────────────
+//  Barre de navigation avec indicateur de progression 
 
 class _NavBar extends StatelessWidget {
   final String title;
@@ -750,7 +751,7 @@ class _NavBar extends StatelessWidget {
   }
 }
 
-// ── Bouton fermer ─────────────────────────────────────────────────────────
+//  Bouton fermer 
 
 class _CloseBtn extends StatelessWidget {
   final VoidCallback onTap;
@@ -778,7 +779,7 @@ class _CloseBtn extends StatelessWidget {
       );
 }
 
-// ── Bouton principal ──────────────────────────────────────────────────────
+//  Bouton principal 
 
 class _PrimaryBtn extends StatelessWidget {
   final String label;

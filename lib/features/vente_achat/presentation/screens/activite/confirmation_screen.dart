@@ -68,13 +68,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EF),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
 
-            // ── Header ──────────────────────────────────────────────────
+            //  Header 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
@@ -100,7 +100,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               ),
             ),
 
-            // ── Icône succès ────────────────────────────────────────────
+            //  Icône succès 
             Expanded(
               flex: 3,
               child: Center(
@@ -111,7 +111,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               ),
             ),
 
-            // ── Titre + sous-titre ───────────────────────────────────────
+            //  Titre + sous-titre 
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -140,7 +140,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const SizedBox(height: 20),
 
-            // ── Carte code ───────────────────────────────────────────────
+            //  Carte code 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SlideTransition(
@@ -158,7 +158,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const SizedBox(height: 12),
 
-            // ── Récap ────────────────────────────────────────────────────
+            //  Récap 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: FadeTransition(
@@ -172,7 +172,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const Spacer(flex: 2),
 
-            // ── CTA ──────────────────────────────────────────────────────
+            //  CTA 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: GestureDetector(
@@ -214,7 +214,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const SizedBox(height: 10),
 
-            // ── Retour accueil ────────────────────────────────────────────
+            //  Retour accueil 
             GestureDetector(
               onTap: () =>
                   Navigator.of(context).popUntil((r) => r.isFirst),
@@ -239,9 +239,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  ICÔNE SUCCÈS
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _SuccessIcon extends StatelessWidget {
   const _SuccessIcon();
@@ -280,21 +280,15 @@ class _SuccessIcon extends StatelessWidget {
             child: const Icon(Icons.check_rounded,
                 color: Colors.white, size: 40),
           ),
-          const Positioned(top: 2, left: 6,
-              child: Text('🎉', style: TextStyle(fontSize: 18))),
-          const Positioned(top: 2, right: 6,
-              child: Text('⭐', style: TextStyle(fontSize: 15))),
-          const Positioned(bottom: 2, left: 2,
-              child: Text('🎊', style: TextStyle(fontSize: 16))),
         ],
       ),
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  CARTE CODE — dark premium, sans overflow
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _CodeCard extends StatelessWidget {
   final List<String> code;
@@ -426,7 +420,7 @@ class _CodeCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        copied ? 'Copié !' : 'Copier',
+                        copied ? 'Copié !': 'Copier',
                         style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -480,9 +474,9 @@ class _DigitTile extends StatelessWidget {
       );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 //  RÉCAP COMMANDE
-// ═══════════════════════════════════════════════════════════════════════════
+// 
 
 class _RecapCard extends StatelessWidget {
   final String commandeId;
