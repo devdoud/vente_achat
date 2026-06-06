@@ -14,10 +14,10 @@ class VendreChoixScreen extends StatefulWidget {
 }
 
 class _VendreChoixScreenState extends State<VendreChoixScreen> {
+  bool   _loading   = true;
   bool   _setupDone = false;
   bool   _onbDone   = false;
   String _nom       = '';
-  String _emoji     = '';
   String _ville     = '';
   String _quartier  = '';
 
@@ -31,31 +31,38 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
     final p = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
+      _loading   = false;
       _onbDone   = p.getBool('vendre_onboarding_done') ?? false;
       _setupDone = p.getBool('boutique_setup_done')    ?? false;
       _nom       = p.getString('boutique_name')        ?? '';
-      _emoji     = p.getString('boutique_emoji')       ?? '';
       _ville     = p.getString('boutique_ville')       ?? '';
       _quartier  = p.getString('boutique_quartier')    ?? '';
     });
   }
+
+  // ─── Navigations ─────────────────────────────────────────────────────────
 
   void _goQuick() => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const CreationAnnoncePhotosScreen()),
       );
 
   void _goBoutique() {
-    final Widget screen = !_onbDone
+    final screen = !_onbDone
         ? const VendreOnboardingScreen()
-        : !_setupDone
-            ? const BoutiqueSetupScreen()
-            : BoutiqueAtelierScreen(
-                nom: _nom, emoji: _emoji,
-                ville: _ville, quartier: _quartier);
+        : BoutiqueAtelierScreen(nom: _nom, ville: _ville, quartier: _quartier);
     Navigator.of(context).push(
       MaterialPageRoute(fullscreenDialog: true, builder: (_) => screen),
     );
   }
+
+  void _goNewBoutique() => Navigator.of(context).push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => const BoutiqueSetupScreen(),
+        ),
+      );
+
+  // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +75,7 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              //  Retour 
+              // Bouton retour
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
@@ -76,13 +83,10 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 8, offset: const Offset(0, 2),
+                    )],
                   ),
                   child: const Icon(Icons.arrow_back_ios_new_rounded,
                       size: 15, color: VAColors.black),
@@ -91,71 +95,21 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
 
               const SizedBox(height: 18),
 
-              //  Titre 
-              RichText(
-                text: const TextSpan(
-                  style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 26,
-                      height: 1.25,
-                      color: VAColors.black),
-                  children: [
-                    TextSpan(
-                        text: 'Que voulez-vous\n',
-                        style: TextStyle(fontWeight: FontWeight.w300)),
-                    TextSpan(
-                        text: 'faire ?',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                  ],
+              if (_loading)
+                const Expanded(child: Center(
+                  child: CircularProgressIndicator(color: VAColors.primary, strokeWidth: 2),
+                ))
+              else if (!_setupDone)
+                _NoBoutiqueLayout(onQuick: _goQuick, onBoutique: _goBoutique)
+              else
+                _HasBoutiqueLayout(
+                  nom:      _nom,
+                  ville:    _ville,
+                  quartier: _quartier,
+                  onAtelier:     _goBoutique,
+                  onQuick:       _goQuick,
+                  onNewBoutique: _goNewBoutique,
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              //  Cartes (remplissent l'espace restant) 
-              Expanded(
-                child: Column(
-                  children: [
-
-                    Expanded(
-                      child: _OptionCard(
-                        icon:        Icons.shopping_bag_outlined,
-                        iconColor:   VAColors.primary,
-                        iconBg:      VAColors.primaryLight,
-                        title:       'Vendre un article',
-                        description: 'Quelques effets perso à vendre ?\nSimple, rapide et sans engagement.',
-                        hints: const ['Photos', 'Détails & prix', 'Justificatif'],
-                        accentColor: VAColors.primary,
-                        ctaLabel:    'Commencer',
-                        onTap:       _goQuick,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Expanded(
-                      child: _OptionCard(
-                        icon:      Icons.storefront_outlined,
-                        iconColor: const Color(0xFF5C6BC0),
-                        iconBg:    const Color(0xFFEDE7F6),
-                        title:       _setupDone
-                            ? (_nom.isNotEmpty ? _nom : 'Ma boutique')
-                            : 'Ouvrir ma boutique',
-                        description: _setupDone
-                            ? 'Accédez à votre atelier,\ngérez vos annonces et ventes.'
-                            : 'Pour vendre régulièrement avec\nune vitrine et un badge confiance.',
-                        hints: _setupDone
-                            ? const ['Atelier', 'Annonces', 'Stats']
-                            : const ['Identité', 'Lieu', 'RCCM', 'Prêt'],
-                        accentColor: const Color(0xFF5C6BC0),
-                        ctaLabel:    _setupDone ? 'Accéder': 'Configurer',
-                        onTap:       _goBoutique,
-                      ),
-                    ),
-
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -164,19 +118,269 @@ class _VendreChoixScreenState extends State<VendreChoixScreen> {
   }
 }
 
-// 
-//  CARTE — s'étire pour remplir sa moitié de l'écran
-// 
+// ─── Layout : PAS de boutique ─────────────────────────────────────────────────
+
+class _NoBoutiqueLayout extends StatelessWidget {
+  final VoidCallback onQuick, onBoutique;
+  const _NoBoutiqueLayout({required this.onQuick, required this.onBoutique});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 26, height: 1.25, color: VAColors.black),
+              children: [
+                TextSpan(text: 'Que voulez-vous\n', style: TextStyle(fontWeight: FontWeight.w300)),
+                TextSpan(text: 'faire ?',           style: TextStyle(fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text('Choisissez comment vous souhaitez vendre.',
+              style: TextStyle(fontSize: 13, color: VAColors.greyText)),
+          const SizedBox(height: 20),
+
+          // Deux cartes égales
+          Expanded(
+            child: _OptionCard(
+              icon: Icons.shopping_bag_outlined,
+              iconColor: VAColors.primary,
+              iconBg: VAColors.primaryLight,
+              title: 'Vendre un article',
+              description: 'Quelques effets perso à vendre ?\nSimple, rapide et sans engagement.',
+              hints: const ['Photos', 'Détails & prix', 'Justificatif'],
+              accentColor: VAColors.primary,
+              ctaLabel: 'Commencer',
+              onTap: onQuick,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _OptionCard(
+              icon: Icons.storefront_outlined,
+              iconColor: const Color(0xFF5C6BC0),
+              iconBg: const Color(0xFFEDE7F6),
+              title: 'Ouvrir ma boutique',
+              description: 'Pour vendre régulièrement avec\nune vitrine et un badge confiance.',
+              hints: const ['Identité', 'Lieu', 'RCCM', 'Prêt'],
+              accentColor: const Color(0xFF5C6BC0),
+              ctaLabel: 'Configurer',
+              onTap: onBoutique,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Layout : A DÉJÀ une boutique ─────────────────────────────────────────────
+
+class _HasBoutiqueLayout extends StatelessWidget {
+  final String nom, ville, quartier;
+  final VoidCallback onAtelier, onQuick, onNewBoutique;
+
+  const _HasBoutiqueLayout({
+    required this.nom,
+    required this.ville,
+    required this.quartier,
+    required this.onAtelier,
+    required this.onQuick,
+    required this.onNewBoutique,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = nom.trim().split(' ')
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0].toUpperCase())
+        .join();
+
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Titre
+          RichText(
+            text: TextSpan(
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 26, height: 1.25, color: VAColors.black),
+              children: [
+                TextSpan(text: 'Que voulez-vous\n', style: TextStyle(fontWeight: FontWeight.w300)),
+                TextSpan(text: 'faire ?',           style: TextStyle(fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text('Accédez à votre boutique ou vendez un article.',
+              style: TextStyle(fontSize: 13, color: VAColors.greyText)),
+          const SizedBox(height: 20),
+
+          // Carte boutique principale (grande)
+          Expanded(
+            flex: 3,
+            child: GestureDetector(
+              onTap: onAtelier,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [VAColors.primary, VAColors.primaryDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [BoxShadow(
+                    color: VAColors.primary.withValues(alpha: 0.30),
+                    blurRadius: 18, offset: const Offset(0, 6),
+                  )],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header : logo + nom + badge
+                    Row(
+                      children: [
+                        Container(
+                          width: 52, height: 52,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.20),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Center(
+                            child: Text(initials,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nom.isNotEmpty ? nom : 'Ma boutique',
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 17,
+                                    fontWeight: FontWeight.w800, height: 1.2),
+                                maxLines: 1, overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              if (quartier.isNotEmpty || ville.isNotEmpty)
+                                Row(children: [
+                                  const Icon(Icons.place_outlined, color: Colors.white60, size: 12),
+                                  const SizedBox(width: 3),
+                                  Flexible(
+                                    child: Text(
+                                      [if (quartier.isNotEmpty) quartier, if (ville.isNotEmpty) ville].join(', '),
+                                      style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ]),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: VAColors.green,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.circle, size: 6, color: Colors.white),
+                              SizedBox(width: 4),
+                              Text('Ouverte',
+                                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const Spacer(),
+
+                    // CTA
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.dashboard_outlined, size: 16, color: VAColors.primary),
+                          const SizedBox(width: 8),
+                          Text('Accéder à l\'atelier',
+                              style: TextStyle(
+                                  color: VAColors.primary,
+                                  fontSize: 14, fontWeight: FontWeight.w800)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.arrow_forward_rounded, size: 14, color: VAColors.primary),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Deux petites cartes côte à côte
+          Expanded(
+            flex: 2,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _SmallCard(
+                    icon: Icons.shopping_bag_outlined,
+                    iconColor: VAColors.primary,
+                    iconBg: VAColors.primaryLight,
+                    title: 'Vendre\nun article',
+                    ctaLabel: 'Vendre',
+                    accentColor: VAColors.primary,
+                    onTap: onQuick,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _SmallCard(
+                    icon: Icons.add_business_outlined,
+                    iconColor: const Color(0xFF2E7D32),
+                    iconBg: const Color(0xFFE8F5E9),
+                    title: 'Créer une\nautre boutique',
+                    ctaLabel: 'Créer',
+                    accentColor: const Color(0xFF2E7D32),
+                    onTap: onNewBoutique,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Grande carte option ──────────────────────────────────────────────────────
 
 class _OptionCard extends StatelessWidget {
   final IconData     icon;
-  final Color        iconColor;
-  final Color        iconBg;
-  final String       title;
-  final String       description;
+  final Color        iconColor, iconBg, accentColor;
+  final String       title, description, ctaLabel;
   final List<String> hints;
-  final Color        accentColor;
-  final String       ctaLabel;
   final VoidCallback onTap;
 
   const _OptionCard({
@@ -199,66 +403,44 @@ class _OptionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: [BoxShadow(
+          color: Colors.black.withValues(alpha: 0.05),
+          blurRadius: 18, offset: const Offset(0, 5),
+        )],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // Icône + titre
           Row(
             children: [
               Container(
-                width: 48, height: 48,
-                decoration: BoxDecoration(
-                    color: iconBg, shape: BoxShape.circle),
-                child: Center(
-                    child: Icon(icon, size: 22, color: iconColor)),
+                width: 44, height: 44,
+                decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                child: Center(child: Icon(icon, size: 20, color: iconColor)),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: VAColors.black,
-                      height: 1.3),
-                ),
+                child: Text(title,
+                    style: const TextStyle(
+                        fontFamily: 'Poppins', fontSize: 15,
+                        fontWeight: FontWeight.w700, color: VAColors.black, height: 1.3),
+                    maxLines: 2, overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
-
-          const SizedBox(height: 10),
-
-          // Description
-          Text(
-            description,
-            style: const TextStyle(
-                fontSize: 13,
-                color: VAColors.greyText,
-                height: 1.55),
+          const SizedBox(height: 6),
+          Expanded(
+            child: Text(description,
+                style: const TextStyle(fontSize: 12, color: VAColors.greyText, height: 1.5),
+                overflow: TextOverflow.ellipsis, maxLines: 4),
           ),
-
-          // Spacer pousse pills + bouton en bas
-          const Spacer(),
-
-          // Pills légères
+          const SizedBox(height: 6),
           Wrap(
-            spacing: 6,
-            runSpacing: 6,
+            spacing: 6, runSpacing: 6,
             children: [
               for (int i = 0; i < hints.length; i++)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 9, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: accentColor.withValues(alpha: 0.07),
                     borderRadius: BorderRadius.circular(20),
@@ -269,61 +451,108 @@ class _OptionCard extends StatelessWidget {
                       Container(
                         width: 15, height: 15,
                         decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
+                            color: accentColor.withValues(alpha: 0.15), shape: BoxShape.circle),
                         child: Center(
                           child: Text('${i + 1}',
-                              style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w800,
-                                  color: accentColor)),
+                              style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: accentColor)),
                         ),
                       ),
                       const SizedBox(width: 4),
                       Text(hints[i],
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: accentColor)),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: accentColor)),
                     ],
                   ),
                 ),
             ],
           ),
-
-          const SizedBox(height: 14),
-
-          // Bouton
+          const SizedBox(height: 8),
           GestureDetector(
             onTap: onTap,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 13),
+              padding: const EdgeInsets.symmetric(vertical: 11),
               decoration: BoxDecoration(
                 color: accentColor,
                 borderRadius: BorderRadius.circular(13),
-                boxShadow: [
-                  BoxShadow(
-                    color: accentColor.withValues(alpha: 0.22),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [BoxShadow(
+                  color: accentColor.withValues(alpha: 0.22),
+                  blurRadius: 10, offset: const Offset(0, 4),
+                )],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(ctaLabel,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700)),
+                  Text(ctaLabel, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_rounded,
-                      color: Colors.white, size: 16),
+                  const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Petite carte (layout boutique existante) ─────────────────────────────────
+
+class _SmallCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor, iconBg, accentColor;
+  final String title, ctaLabel;
+  final VoidCallback onTap;
+
+  const _SmallCard({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.title,
+    required this.ctaLabel,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(
+          color: Colors.black.withValues(alpha: 0.05),
+          blurRadius: 14, offset: const Offset(0, 4),
+        )],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(10)),
+            child: Center(child: Icon(icon, size: 18, color: iconColor)),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Text(title,
+                style: const TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w700, color: VAColors.black, height: 1.3)),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 9),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(ctaLabel,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w700, color: accentColor)),
             ),
           ),
         ],

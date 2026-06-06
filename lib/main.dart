@@ -60,7 +60,11 @@ Future<void> main() async {
       runApp(const MyApp());
     },
     (error, stack) {
-      AppLogger.get().logError(error.toString(), error, stack);
+      // Guard contre la ré-entrance du Logger (ex: erreurs réseau simultanées)
+      if (kDebugMode) debugPrint('Zone error: $error');
+      try {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: false);
+      } catch (_) {}
     },
   );
 }
@@ -73,25 +77,36 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late final AuthCubit _authCubit;
+
   @override
   void initState() {
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((record) {
-      if (record.level == Level.SEVERE) {
-        FirebaseCrashlytics.instance.recordError(
-          record.error,
-          record.stackTrace,
-        );
+      if (record.level == Level.SEVERE && record.error != null) {
+        // Try/catch essentiel : une exception ici cause une ré-entrance du Logger
+        try {
+          FirebaseCrashlytics.instance.recordError(
+            record.error,
+            record.stackTrace,
+          );
+        } catch (_) {}
       }
-
       if (kDebugMode) {
         debugPrint(
-          '${record.level.name}: ${record.time}: ${record.message} ${record.stackTrace}',
+          '${record.level.name}: ${record.time}: ${record.message}',
         );
       }
     });
 
+    _authCubit = getIt<AuthCubit>()..checkAuth();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _authCubit.close();
+    super.dispose();
   }
 
   @override
@@ -106,21 +121,24 @@ class _MyAppState extends State<MyApp> {
 
     final router = getIt<AppRouter>();
 
-    return OverlaySupport.global(
-      child: MaterialApp.router(
-        title: 'Achat & Vente',
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: const [
-          ...AppLocalizations.localizationsDelegates,
-          FormBuilderLocalizations.delegate,
-        ],
-        locale: const Locale('fr'),
-        debugShowCheckedModeBanner: false,
-        theme: IWidgetsFactory.build().theme.theme,
-        routerDelegate: router.delegate(
-          navigatorObservers: () => [AutoRouteObserver()],
+    return BlocProvider.value(
+      value: _authCubit,
+      child: OverlaySupport.global(
+        child: MaterialApp.router(
+          title: 'Achat & Vente',
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            FormBuilderLocalizations.delegate,
+          ],
+          locale: const Locale('fr'),
+          debugShowCheckedModeBanner: false,
+          theme: IWidgetsFactory.build().theme.theme,
+          routerDelegate: router.delegate(
+            navigatorObservers: () => [AutoRouteObserver()],
+          ),
+          routeInformationParser: router.defaultRouteParser(),
         ),
-        routeInformationParser: router.defaultRouteParser(),
       ),
     );
   }

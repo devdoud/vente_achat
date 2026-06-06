@@ -1,17 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../../core/injection/injection.dart';
+import '../../../../../core/utils/failures.dart';
 import '../../theme/va_theme.dart';
+import '../../../logic/export.dart';
 import 'boutique_atelier_screen.dart';
 import 'creation_widgets.dart';
 
 const _kBoutiqueSetupDone = 'boutique_setup_done';
 const _kBoutiqueName      = 'boutique_name';
-const _kBoutiqueEmoji     = 'boutique_emoji';
+// _kBoutiqueEmoji conservé pour rétrocompatibilité avec les prefs existantes
 const _kBoutiqueVille     = 'boutique_ville';
 const _kBoutiqueQuartier  = 'boutique_quartier';
 const _kBoutiqueAdresse   = 'boutique_adresse';
+const _kBoutiqueShopUuid  = 'boutique_shop_uuid';
 
 //  Villes béninoises 
 const _villes = [
@@ -43,28 +48,49 @@ class BoutiqueSetupScreen extends StatefulWidget {
 }
 
 class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
-  int    _step     = 0;
-  String _nom      = '';
-  String _emoji    = '';
+  int    _step = 0;
+  String _nom  = '';
   String _ville    = 'Cotonou';
   String _quartier = '';
   String _adresse  = '';
+
+  late final ShopCubit _shopCubit;
+
   void _toStep(int s) => setState(() => _step = s);
 
+  @override
+  void initState() {
+    super.initState();
+    _shopCubit = getIt<ShopCubit>();
+  }
+
+  @override
+  void dispose() {
+    _shopCubit.close();
+    super.dispose();
+  }
+
   Future<void> _finish() async {
+    // Accès direct au cubit via la variable d'instance (pas via context.read)
+    _shopCubit.createShop(
+      name:        _nom,
+      description: _quartier.isNotEmpty ? '$_quartier, $_ville' : _ville,
+    );
+  }
+
+  Future<void> _onShopCreated(String shopUuid) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kBoutiqueSetupDone, true);
-    await prefs.setString(_kBoutiqueName,    _nom);
-    await prefs.setString(_kBoutiqueEmoji,   _emoji);
-    await prefs.setString(_kBoutiqueVille,   _ville);
+    await prefs.setString(_kBoutiqueName,     _nom);
+    await prefs.setString(_kBoutiqueVille,    _ville);
     await prefs.setString(_kBoutiqueQuartier, _quartier);
     await prefs.setString(_kBoutiqueAdresse,  _adresse);
+    await prefs.setString(_kBoutiqueShopUuid, shopUuid);
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => BoutiqueAtelierScreen(
-          nom: _nom, emoji: _emoji,
-          ville: _ville, quartier: _quartier,
+          nom: _nom, ville: _ville, quartier: _quartier,
         ),
       ),
     );
@@ -72,7 +98,26 @@ class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
+    return BlocProvider.value(
+      value: _shopCubit,
+      child: BlocConsumer<ShopCubit, ShopState>(
+        listener: (ctx, state) {
+          if (state is ShopCreated) {
+            _onShopCreated(state.shopUuid);
+          } else if (state is ShopFailure) {
+            ScaffoldMessenger.of(ctx)
+              ..clearSnackBars()
+              ..showSnackBar(SnackBar(
+                content: Text(state.failure.toMsg,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                backgroundColor: VAColors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              ));
+          }
+        },
+        builder: (ctx, shopState) => AnimatedSwitcher(
       duration: const Duration(milliseconds: 340),
       switchInCurve:  Curves.easeOutCubic,
       switchOutCurve: Curves.easeInQuart,
@@ -88,7 +133,7 @@ class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
         0 => _StepIdentite(
             key: const ValueKey(0),
             onNext: (nom, emoji) {
-              setState(() { _nom = nom; _emoji = emoji; });
+              setState(() { _nom = nom; });
               _toStep(1);
             },
           ),
@@ -113,13 +158,15 @@ class _BoutiqueSetupState extends State<BoutiqueSetupScreen> {
         _ => _StepPret(
             key: const ValueKey(3),
             nom:      _nom,
-            emoji:    _emoji,
             ville:    _ville,
             quartier: _quartier,
             onFinish: _finish,
+            isLoading: shopState is ShopLoading,
           ),
       },
-    );
+        ), // AnimatedSwitcher
+      ),   // BlocConsumer
+    );     // BlocProvider
   }
 }
 
@@ -498,13 +545,15 @@ class _StepLieuState extends State<_StepLieu> {
 // 
 
 class _StepPret extends StatefulWidget {
-  final String nom, emoji, ville, quartier;
+  final String nom, ville, quartier;
   final Future<void> Function() onFinish;
+  final bool isLoading;
   const _StepPret({
     super.key,
-    required this.nom, required this.emoji,
+    required this.nom,
     required this.ville, required this.quartier,
     required this.onFinish,
+    this.isLoading = false,
   });
 
   @override
@@ -588,7 +637,6 @@ class _StepPretState extends State<_StepPret>
                             scale: _scale,
                             child: _RecapCard(
                               nom:      widget.nom,
-                              emoji:    widget.emoji,
                               ville:    widget.ville,
                               quartier: widget.quartier,
                             ),
@@ -671,40 +719,48 @@ class _StepPretState extends State<_StepPret>
               ),
             ),
 
-            // CTAs
+            // CTA principal
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: GestureDetector(
-                onTap: _cgv ? widget.onFinish : null,
+                onTap: (_cgv && !widget.isLoading) ? widget.onFinish : null,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: _cgv ? VAColors.primary : VAColors.greyBorder,
+                    color: (_cgv && !widget.isLoading)
+                        ? VAColors.primary : VAColors.greyBorder,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: _cgv ? [BoxShadow(
+                    boxShadow: (_cgv && !widget.isLoading) ? [BoxShadow(
                       color: VAColors.primary.withValues(alpha: 0.35),
                       blurRadius: 14, offset: const Offset(0, 5),
                     )] : null,
                   ),
-                  child: Text(
-                    'Publier mon premier produit →',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: _cgv ? Colors.white : VAColors.grey,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800),
-                  ),
+                  child: widget.isLoading
+                      ? const Center(child: SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2.5, color: Colors.white)))
+                      : Text(
+                          'Publier mon premier produit →',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: _cgv ? Colors.white : VAColors.grey,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800),
+                        ),
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 28),
               child: GestureDetector(
-                onTap: widget.onFinish,
-                child: const Text('Personnaliser plus tard',
-                    style: TextStyle(fontSize: 13, color: VAColors.grey)),
+                onTap: widget.isLoading ? null : widget.onFinish,
+                child: Text('Personnaliser plus tard',
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: widget.isLoading ? VAColors.greyBorder : VAColors.grey)),
               ),
             ),
           ],
@@ -717,9 +773,9 @@ class _StepPretState extends State<_StepPret>
 //  Carte récap boutique 
 
 class _RecapCard extends StatelessWidget {
-  final String nom, emoji, ville, quartier;
+  final String nom, ville, quartier;
   const _RecapCard({
-    required this.nom, required this.emoji,
+    required this.nom,
     required this.ville, required this.quartier,
   });
 

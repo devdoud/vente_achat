@@ -2,6 +2,39 @@ import 'package:flutter/material.dart';
 import '../../domain/annonce.dart';
 import '../theme/va_theme.dart';
 
+IconData _catIcon(AnnonceCategorie cat) => switch (cat) {
+      AnnonceCategorie.telephones => Icons.smartphone_rounded,
+      AnnonceCategorie.mode       => Icons.checkroom_rounded,
+      AnnonceCategorie.maison     => Icons.home_rounded,
+      AnnonceCategorie.auto       => Icons.directions_car_rounded,
+      AnnonceCategorie.beaute     => Icons.face_retouching_natural,
+      AnnonceCategorie.hightech   => Icons.laptop_rounded,
+      AnnonceCategorie.sport      => Icons.sports_soccer_rounded,
+      AnnonceCategorie.livres     => Icons.menu_book_rounded,
+    };
+
+Color _catIconColor(AnnonceCategorie cat) => switch (cat) {
+      AnnonceCategorie.telephones => const Color(0xFF1565C0),
+      AnnonceCategorie.mode       => const Color(0xFFAD1457),
+      AnnonceCategorie.maison     => const Color(0xFF2E7D32),
+      AnnonceCategorie.auto       => const Color(0xFFE65100),
+      AnnonceCategorie.beaute     => const Color(0xFF6A1B9A),
+      AnnonceCategorie.hightech   => const Color(0xFF1B5E20),
+      AnnonceCategorie.sport      => const Color(0xFF1A237E),
+      AnnonceCategorie.livres     => const Color(0xFF4E342E),
+    };
+
+Color _catBg(AnnonceCategorie cat) => switch (cat) {
+      AnnonceCategorie.telephones => const Color(0xFFE3F2FD),
+      AnnonceCategorie.mode       => const Color(0xFFFCE4EC),
+      AnnonceCategorie.maison     => const Color(0xFFE8F5E9),
+      AnnonceCategorie.auto       => const Color(0xFFFFF8E1),
+      AnnonceCategorie.beaute     => const Color(0xFFF3E5F5),
+      AnnonceCategorie.hightech   => const Color(0xFFE8F5E9),
+      AnnonceCategorie.sport      => const Color(0xFFE8EAF6),
+      AnnonceCategorie.livres     => const Color(0xFFFBE9E7),
+    };
+
 class VAProductCard extends StatefulWidget {
   final Annonce annonce;
   final VoidCallback? onTap;
@@ -41,6 +74,7 @@ class _VAProductCardState extends State<VAProductCard> {
         ),
         clipBehavior: Clip.hardEdge,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _ProductImage(annonce: widget.annonce, isFavorite: _isFavorite, onFavorite: () {
@@ -48,8 +82,9 @@ class _VAProductCardState extends State<VAProductCard> {
               widget.onFavorite?.call();
             }),
             Padding(
-              padding: const EdgeInsets.all(VAPadding.sm),
+              padding: const EdgeInsets.fromLTRB(VAPadding.sm, VAPadding.sm, VAPadding.sm, VAPadding.md),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.annonce.titre, style: VATextStyles.cardTitle, maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -62,8 +97,9 @@ class _VAProductCardState extends State<VAProductCard> {
                     children: [
                       const Icon(Icons.location_on_outlined, size: 11, color: VAColors.grey),
                       const SizedBox(width: 2),
-                      Text(widget.annonce.localisation, style: VATextStyles.caption),
-                      const Spacer(),
+                      Expanded(
+                        child: Text(widget.annonce.localisation, style: VATextStyles.caption, overflow: TextOverflow.ellipsis),
+                      ),
                       Text(widget.annonce.tempsPublication, style: VATextStyles.caption),
                     ],
                   ),
@@ -91,9 +127,9 @@ class _ProductImage extends StatelessWidget {
         AspectRatio(
           aspectRatio: 1,
           child: Container(
-            color: _bgColor(annonce.categorie),
+            color: _catBg(annonce.categorie),
             child: Center(
-              child: Text(annonce.categorie.emoji, style: const TextStyle(fontSize: 48)),
+              child: Icon(_catIcon(annonce.categorie), size: 52, color: _catIconColor(annonce.categorie).withValues(alpha: 0.7)),
             ),
           ),
         ),
@@ -120,7 +156,7 @@ class _ProductImage extends StatelessWidget {
                 color: VAColors.red,
                 borderRadius: BorderRadius.circular(VARadius.xs),
               ),
-              child: Text('+ -${annonce.remisePourcent}%', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+              child: Text('-${annonce.remisePourcent}%', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
             ),
           ),
         Positioned(
@@ -143,14 +179,6 @@ class _ProductImage extends StatelessWidget {
       ],
     );
   }
-
-  Color _bgColor(AnnonceCategorie cat) => switch (cat) {
-        AnnonceCategorie.telephones => const Color(0xFFE3F2FD),
-        AnnonceCategorie.mode => const Color(0xFFFCE4EC),
-        AnnonceCategorie.hightech => const Color(0xFFE8F5E9),
-        AnnonceCategorie.auto => const Color(0xFFFFF8E1),
-        _ => const Color(0xFFF3E5F5),
-      };
 }
 
 // Card compacte pour la liste "Mes annonces"
@@ -177,10 +205,10 @@ class VAAnnonceListCard extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
+              color: _catBg(annonce.categorie),
               borderRadius: BorderRadius.circular(VARadius.sm),
             ),
-            child: Center(child: Text(annonce.categorie.emoji, style: const TextStyle(fontSize: 28))),
+            child: Center(child: Icon(_catIcon(annonce.categorie), size: 28, color: _catIconColor(annonce.categorie).withValues(alpha: 0.7))),
           ),
           const SizedBox(width: VAPadding.md),
           Expanded(
@@ -227,10 +255,10 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, bg) = switch (status) {
-      AnnonceStatus.active => (VAColors.green, VAColors.greenLight),
+      AnnonceStatus.active    => (VAColors.green, VAColors.greenLight),
       AnnonceStatus.enAttente => (const Color(0xFFF57C00), const Color(0xFFFFF3E0)),
-      AnnonceStatus.vendue => (VAColors.grey, VAColors.greyLight),
-      AnnonceStatus.enLigne => (VAColors.green, VAColors.greenLight),
+      AnnonceStatus.vendue    => (VAColors.grey, VAColors.greyLight),
+      AnnonceStatus.enLigne   => (VAColors.green, VAColors.greenLight),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

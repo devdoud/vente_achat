@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import '../../theme/va_theme.dart';
+import '../../utils/cat_helpers.dart';
 import '../../widgets/export.dart';
 import '../../../domain/export.dart';
 
@@ -40,7 +41,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(color: VAColors.primaryLight, borderRadius: BorderRadius.circular(VARadius.md)),
-              child: Center(child: Text(widget.annonce.categorie.emoji, style: const TextStyle(fontSize: 32))),
+              child: Center(child: Icon(catIcon(widget.annonce.categorie), size: 32, color: VAColors.primaryDark)),
             ),
             const SizedBox(height: 12),
             const Text('Comment s\'est passée\nvotre transaction ?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: VAColors.black), textAlign: TextAlign.center),

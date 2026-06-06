@@ -147,15 +147,18 @@ class CreationStepBar extends StatelessWidget {
 //  Bottom bar retour / continuer 
 
 class CreationBottomBar extends StatelessWidget {
-  final VoidCallback onBack, onNext;
+  final VoidCallback? onBack;
+  final VoidCallback? onNext;
   final bool canContinue;
+  final bool isLoading;
   final String nextLabel;
 
   const CreationBottomBar({
     super.key,
-    required this.onBack,
-    required this.onNext,
+    this.onBack,
+    this.onNext,
     this.canContinue = true,
+    this.isLoading = false,
     this.nextLabel = 'Continuer →',
   });
 
@@ -201,14 +204,17 @@ class CreationBottomBar extends StatelessWidget {
                       : null,
                 ),
                 child: Center(
-                  child: Text(
-                    nextLabel,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: canContinue ? Colors.white : VAColors.grey,
-                    ),
-                  ),
+                  child: isLoading
+                      ? const SizedBox(width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : Text(
+                          nextLabel,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: canContinue ? Colors.white : VAColors.grey,
+                          ),
+                        ),
                 ),
               ),
             ),

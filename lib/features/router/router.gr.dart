@@ -69,10 +69,15 @@ class AnnoncePubileeRoute extends PageRouteInfo<AnnoncePubileeRouteArgs> {
   AnnoncePubileeRoute({
     Key? key,
     required Annonce annonce,
+    String? localImagePath,
     List<PageRouteInfo>? children,
   }) : super(
          AnnoncePubileeRoute.name,
-         args: AnnoncePubileeRouteArgs(key: key, annonce: annonce),
+         args: AnnoncePubileeRouteArgs(
+           key: key,
+           annonce: annonce,
+           localImagePath: localImagePath,
+         ),
          initialChildren: children,
        );
 
@@ -82,21 +87,31 @@ class AnnoncePubileeRoute extends PageRouteInfo<AnnoncePubileeRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<AnnoncePubileeRouteArgs>();
-      return AnnoncePubileeScreen(key: args.key, annonce: args.annonce);
+      return AnnoncePubileeScreen(
+        key: args.key,
+        annonce: args.annonce,
+        localImagePath: args.localImagePath,
+      );
     },
   );
 }
 
 class AnnoncePubileeRouteArgs {
-  const AnnoncePubileeRouteArgs({this.key, required this.annonce});
+  const AnnoncePubileeRouteArgs({
+    this.key,
+    required this.annonce,
+    this.localImagePath,
+  });
 
   final Key? key;
 
   final Annonce annonce;
 
+  final String? localImagePath;
+
   @override
   String toString() {
-    return 'AnnoncePubileeRouteArgs{key: $key, annonce: $annonce}';
+    return 'AnnoncePubileeRouteArgs{key: $key, annonce: $annonce, localImagePath: $localImagePath}';
   }
 }
 
@@ -241,16 +256,11 @@ class ChatRouteArgs {
 class ConfirmationRoute extends PageRouteInfo<ConfirmationRouteArgs> {
   ConfirmationRoute({
     Key? key,
-    required String commandeId,
-    required double totalPaye,
+    required Order order,
     List<PageRouteInfo>? children,
   }) : super(
          ConfirmationRoute.name,
-         args: ConfirmationRouteArgs(
-           key: key,
-           commandeId: commandeId,
-           totalPaye: totalPaye,
-         ),
+         args: ConfirmationRouteArgs(key: key, order: order),
          initialChildren: children,
        );
 
@@ -260,31 +270,21 @@ class ConfirmationRoute extends PageRouteInfo<ConfirmationRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<ConfirmationRouteArgs>();
-      return ConfirmationScreen(
-        key: args.key,
-        commandeId: args.commandeId,
-        totalPaye: args.totalPaye,
-      );
+      return ConfirmationScreen(key: args.key, order: args.order);
     },
   );
 }
 
 class ConfirmationRouteArgs {
-  const ConfirmationRouteArgs({
-    this.key,
-    required this.commandeId,
-    required this.totalPaye,
-  });
+  const ConfirmationRouteArgs({this.key, required this.order});
 
   final Key? key;
 
-  final String commandeId;
-
-  final double totalPaye;
+  final Order order;
 
   @override
   String toString() {
-    return 'ConfirmationRouteArgs{key: $key, commandeId: $commandeId, totalPaye: $totalPaye}';
+    return 'ConfirmationRouteArgs{key: $key, order: $order}';
   }
 }
 
@@ -359,16 +359,70 @@ class FavorisRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [FiltresScreen]
-class FiltresRoute extends PageRouteInfo<void> {
-  const FiltresRoute({List<PageRouteInfo>? children})
-    : super(FiltresRoute.name, initialChildren: children);
+class FiltresRoute extends PageRouteInfo<FiltresRouteArgs> {
+  FiltresRoute({
+    Key? key,
+    SearchFilters? initialFilters,
+    List<Category> categories = const [],
+    List<PageRouteInfo>? children,
+  }) : super(
+         FiltresRoute.name,
+         args: FiltresRouteArgs(
+           key: key,
+           initialFilters: initialFilters,
+           categories: categories,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'FiltresRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const FiltresScreen();
+      final args = data.argsAs<FiltresRouteArgs>(
+        orElse: () => const FiltresRouteArgs(),
+      );
+      return FiltresScreen(
+        key: args.key,
+        initialFilters: args.initialFilters,
+        categories: args.categories,
+      );
+    },
+  );
+}
+
+class FiltresRouteArgs {
+  const FiltresRouteArgs({
+    this.key,
+    this.initialFilters,
+    this.categories = const [],
+  });
+
+  final Key? key;
+
+  final SearchFilters? initialFilters;
+
+  final List<Category> categories;
+
+  @override
+  String toString() {
+    return 'FiltresRouteArgs{key: $key, initialFilters: $initialFilters, categories: $categories}';
+  }
+}
+
+/// generated route for
+/// [LoginScreen]
+class LoginRoute extends PageRouteInfo<void> {
+  const LoginRoute({List<PageRouteInfo>? children})
+    : super(LoginRoute.name, initialChildren: children);
+
+  static const String name = 'LoginRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const LoginScreen();
     },
   );
 }
@@ -411,10 +465,15 @@ class OffreSureRoute extends PageRouteInfo<OffreSureRouteArgs> {
   OffreSureRoute({
     Key? key,
     required Annonce annonce,
+    int quantity = 1,
     List<PageRouteInfo>? children,
   }) : super(
          OffreSureRoute.name,
-         args: OffreSureRouteArgs(key: key, annonce: annonce),
+         args: OffreSureRouteArgs(
+           key: key,
+           annonce: annonce,
+           quantity: quantity,
+         ),
          initialChildren: children,
        );
 
@@ -424,21 +483,31 @@ class OffreSureRoute extends PageRouteInfo<OffreSureRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<OffreSureRouteArgs>();
-      return OffreSureScreen(key: args.key, annonce: args.annonce);
+      return OffreSureScreen(
+        key: args.key,
+        annonce: args.annonce,
+        quantity: args.quantity,
+      );
     },
   );
 }
 
 class OffreSureRouteArgs {
-  const OffreSureRouteArgs({this.key, required this.annonce});
+  const OffreSureRouteArgs({
+    this.key,
+    required this.annonce,
+    this.quantity = 1,
+  });
 
   final Key? key;
 
   final Annonce annonce;
 
+  final int quantity;
+
   @override
   String toString() {
-    return 'OffreSureRouteArgs{key: $key, annonce: $annonce}';
+    return 'OffreSureRouteArgs{key: $key, annonce: $annonce, quantity: $quantity}';
   }
 }
 
@@ -459,15 +528,31 @@ class ProfilRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [RegisterScreen]
+class RegisterRoute extends PageRouteInfo<void> {
+  const RegisterRoute({List<PageRouteInfo>? children})
+    : super(RegisterRoute.name, initialChildren: children);
+
+  static const String name = 'RegisterRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const RegisterScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [SuiviCommandeScreen]
 class SuiviCommandeRoute extends PageRouteInfo<SuiviCommandeRouteArgs> {
   SuiviCommandeRoute({
     Key? key,
-    required String commandeId,
+    required Order order,
     List<PageRouteInfo>? children,
   }) : super(
          SuiviCommandeRoute.name,
-         args: SuiviCommandeRouteArgs(key: key, commandeId: commandeId),
+         args: SuiviCommandeRouteArgs(key: key, order: order),
          initialChildren: children,
        );
 
@@ -477,21 +562,21 @@ class SuiviCommandeRoute extends PageRouteInfo<SuiviCommandeRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<SuiviCommandeRouteArgs>();
-      return SuiviCommandeScreen(key: args.key, commandeId: args.commandeId);
+      return SuiviCommandeScreen(key: args.key, order: args.order);
     },
   );
 }
 
 class SuiviCommandeRouteArgs {
-  const SuiviCommandeRouteArgs({this.key, required this.commandeId});
+  const SuiviCommandeRouteArgs({this.key, required this.order});
 
   final Key? key;
 
-  final String commandeId;
+  final Order order;
 
   @override
   String toString() {
-    return 'SuiviCommandeRouteArgs{key: $key, commandeId: $commandeId}';
+    return 'SuiviCommandeRouteArgs{key: $key, order: $order}';
   }
 }
 
@@ -529,16 +614,53 @@ class VAHomeRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [VendreFormScreen]
-class VendreFormRoute extends PageRouteInfo<void> {
-  const VendreFormRoute({List<PageRouteInfo>? children})
-    : super(VendreFormRoute.name, initialChildren: children);
+class VendreFormRoute extends PageRouteInfo<VendreFormRouteArgs> {
+  VendreFormRoute({
+    Key? key,
+    required List<XFile> photos,
+    List<PageRouteInfo>? children,
+  }) : super(
+         VendreFormRoute.name,
+         args: VendreFormRouteArgs(key: key, photos: photos),
+         initialChildren: children,
+       );
 
   static const String name = 'VendreFormRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const VendreFormScreen();
+      final args = data.argsAs<VendreFormRouteArgs>();
+      return VendreFormScreen(key: args.key, photos: args.photos);
+    },
+  );
+}
+
+class VendreFormRouteArgs {
+  const VendreFormRouteArgs({this.key, required this.photos});
+
+  final Key? key;
+
+  final List<XFile> photos;
+
+  @override
+  String toString() {
+    return 'VendreFormRouteArgs{key: $key, photos: $photos}';
+  }
+}
+
+/// generated route for
+/// [WalletScreen]
+class WalletRoute extends PageRouteInfo<void> {
+  const WalletRoute({List<PageRouteInfo>? children})
+    : super(WalletRoute.name, initialChildren: children);
+
+  static const String name = 'WalletRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WalletScreen();
     },
   );
 }

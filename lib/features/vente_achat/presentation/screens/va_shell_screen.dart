@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/export.dart';
+import 'package:achat_vente/core/injection/injection.dart';
+import 'package:achat_vente/features/vente_achat/logic/export.dart';
 import 'catalogue/va_home_screen.dart';
 import 'activite/activite_screen.dart';
 import 'activite/favoris_screen.dart';
-import 'vendeur/vendre_choix_screen.dart';
+import 'vendeur/boutique_atelier_screen.dart';
+import 'vendeur/boutique_setup_screen.dart';
+import 'vendeur/vendre_onboarding_screen.dart';
 
 /// Shell persistant du module Vente & Achat.
-///
-/// Flux Vendre → VendreChoixScreen (choix particulier vs boutique)
 class VAShellScreen extends StatefulWidget {
   const VAShellScreen({super.key});
 
@@ -16,7 +20,22 @@ class VAShellScreen extends StatefulWidget {
 }
 
 class _VAShellScreenState extends State<VAShellScreen> {
+  // Initialisation directe — jamais en état non initialisé, même lors d'un hot reload
+  final CartCubit _cartCubit = getIt<CartCubit>();
+
   int _shellIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _cartCubit.load();
+  }
+
+  @override
+  void dispose() {
+
+    super.dispose();
+  }
 
   int get _navIndex => const [0, 2, 3][_shellIndex];
 
@@ -35,17 +54,30 @@ class _VAShellScreenState extends State<VAShellScreen> {
 
   Future<void> _openVendre() async {
     if (!mounted) return;
+    final prefs     = await SharedPreferences.getInstance();
+    final setupDone = prefs.getBool('boutique_setup_done')    ?? false;
+    final onbDone   = prefs.getBool('vendre_onboarding_done') ?? false;
+    final nom       = prefs.getString('boutique_name')        ?? '';
+    final ville     = prefs.getString('boutique_ville')       ?? '';
+    final quartier  = prefs.getString('boutique_quartier')    ?? '';
+    if (!mounted) return;
+
+    final Widget screen = setupDone
+        ? BoutiqueAtelierScreen(nom: nom, ville: ville, quartier: quartier)
+        : !onbDone
+            ? const VendreOnboardingScreen()
+            : const BoutiqueSetupScreen();
+
     Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => const VendreChoixScreen(),
-      ),
+      MaterialPageRoute(fullscreenDialog: true, builder: (_) => screen),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocProvider.value(
+      value: _cartCubit,
+      child: Scaffold(
       body: IndexedStack(
         index: _shellIndex,
         children: const [
@@ -58,6 +90,7 @@ class _VAShellScreenState extends State<VAShellScreen> {
         currentIndex: _navIndex,
         onTap: _onNavTap,
       ),
-    );
+      ),  // Scaffold
+    );    // BlocProvider
   }
 }

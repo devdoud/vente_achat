@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import '../../theme/va_theme.dart';
+import '../../utils/cat_helpers.dart';
 import '../../widgets/export.dart';
 import '../../../domain/export.dart';
 
@@ -128,7 +129,7 @@ class _AnnonceSticky extends StatelessWidget {
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(color: const Color(0xFFE3F2FD), borderRadius: BorderRadius.circular(VARadius.sm)),
-            child: Center(child: Text(annonce.categorie.emoji, style: const TextStyle(fontSize: 22))),
+            child: Center(child: Icon(catIcon(annonce.categorie), size: 22, color: catIconColor(annonce.categorie))),
           ),
           const SizedBox(width: 10),
           Expanded(

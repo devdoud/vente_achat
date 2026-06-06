@@ -82,8 +82,10 @@ class Annonce {
       ancienPrix != null ? '${_formatPrix(ancienPrix!)} F' : null;
 
   int? get remisePourcent {
-    if (ancienPrix == null) return null;
-    return (((ancienPrix! - prix) / ancienPrix!) * 100).round();
+    if (ancienPrix == null || ancienPrix! <= 0) return null;
+    final ratio = ((ancienPrix! - prix) / ancienPrix!) * 100;
+    if (ratio.isInfinite || ratio.isNaN) return null;
+    return ratio.round();
   }
 
   static String _formatPrix(double prix) {

@@ -1,7 +1,11 @@
 export 'presentation/theme/va_theme.dart';
 export 'presentation/widgets/export.dart';
 export 'domain/export.dart';
+export 'data/export.dart';
+export 'logic/export.dart';
 export 'presentation/screens/va_shell_screen.dart';
+export 'presentation/screens/auth/login_screen.dart';
+export 'presentation/screens/auth/register_screen.dart';
 export 'presentation/screens/catalogue/super_app_home_screen.dart';
 export 'presentation/screens/catalogue/va_home_screen.dart';
 export 'presentation/screens/catalogue/annonces_feed_screen.dart';

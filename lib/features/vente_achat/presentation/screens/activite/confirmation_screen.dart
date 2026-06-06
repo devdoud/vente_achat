@@ -2,17 +2,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/va_theme.dart';
+import '../../../domain/models/order_model.dart';
 import '../transaction/suivi_commande_screen.dart';
 
 @RoutePage()
 class ConfirmationScreen extends StatefulWidget {
-  final String commandeId;
-  final double totalPaye;
-  const ConfirmationScreen({
-    super.key,
-    required this.commandeId,
-    required this.totalPaye,
-  });
+  final Order order;
+  const ConfirmationScreen({super.key, required this.order});
 
   @override
   State<ConfirmationScreen> createState() => _ConfirmationScreenState();
@@ -20,7 +16,6 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen>
     with TickerProviderStateMixin {
-  static const _code = ['7', '2', '4', '9'];
 
   late final AnimationController _checkCtrl;
   late final AnimationController _cardCtrl;
@@ -38,14 +33,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     _cardCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
 
-    _checkScale = CurvedAnimation(
-        parent: _checkCtrl, curve: Curves.elasticOut);
-    _cardFade   = CurvedAnimation(
-        parent: _cardCtrl, curve: Curves.easeOut);
-    _cardSlide  = Tween<Offset>(
-            begin: const Offset(0, 0.10), end: Offset.zero)
-        .animate(CurvedAnimation(
-            parent: _cardCtrl, curve: Curves.easeOutCubic));
+    _checkScale = CurvedAnimation(parent: _checkCtrl, curve: Curves.elasticOut);
+    _cardFade   = CurvedAnimation(parent: _cardCtrl,  curve: Curves.easeOut);
+    _cardSlide  = Tween<Offset>(begin: const Offset(0, 0.10), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _cardCtrl, curve: Curves.easeOutCubic));
 
     _checkCtrl.forward().then((_) => _cardCtrl.forward());
   }
@@ -58,7 +49,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   }
 
   void _copyCode() {
-    Clipboard.setData(ClipboardData(text: _code.join()));
+    final code = widget.order.codeDigits.join();
+    Clipboard.setData(ClipboardData(text: code));
     setState(() => _copied = true);
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _copied = false);
@@ -67,6 +59,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -74,7 +67,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
 
-            //  Header 
+            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
@@ -84,34 +77,26 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     child: Text(
                       'Confirmation',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: VAColors.black),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: VAColors.black),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded,
-                        size: 20, color: VAColors.greyText),
-                    onPressed: () =>
-                        Navigator.of(context).popUntil((r) => r.isFirst),
+                    icon: const Icon(Icons.close_rounded, size: 20, color: VAColors.greyText),
+                    onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
                   ),
                 ],
               ),
             ),
 
-            //  Icône succès 
+            // Icône succès
             Expanded(
               flex: 3,
               child: Center(
-                child: ScaleTransition(
-                  scale: _checkScale,
-                  child: const _SuccessIcon(),
-                ),
+                child: ScaleTransition(scale: _checkScale, child: const _SuccessIcon()),
               ),
             ),
 
-            //  Titre + sous-titre 
+            // Titre + sous-titre
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -120,19 +105,14 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     'Achat confirmé !',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: VAColors.black),
+                        fontFamily: 'Poppins', fontSize: 24,
+                        fontWeight: FontWeight.w800, color: VAColors.black),
                   ),
                   SizedBox(height: 6),
                   Text(
                     'Paiement sécurisé. Donnez ce code\nau livreur à la réception.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: VAColors.greyText,
-                        height: 1.5),
+                    style: TextStyle(fontSize: 13, color: VAColors.greyText, height: 1.5),
                   ),
                 ],
               ),
@@ -140,7 +120,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const SizedBox(height: 20),
 
-            //  Carte code 
+            // Carte code
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SlideTransition(
@@ -148,7 +128,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                 child: FadeTransition(
                   opacity: _cardFade,
                   child: _CodeCard(
-                    code: _code,
+                    code: order.codeDigits,
                     copied: _copied,
                     onCopy: _copyCode,
                   ),
@@ -158,28 +138,24 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const SizedBox(height: 12),
 
-            //  Récap 
+            // Récap
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: FadeTransition(
                 opacity: _cardFade,
-                child: _RecapCard(
-                  commandeId: widget.commandeId,
-                  totalPaye: widget.totalPaye,
-                ),
+                child: _RecapCard(order: order),
               ),
             ),
 
             const Spacer(flex: 2),
 
-            //  CTA 
+            // CTA
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: GestureDetector(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => SuiviCommandeScreen(
-                        commandeId: widget.commandeId),
+                    builder: (_) => SuiviCommandeScreen(order: order),
                   ),
                 ),
                 child: Container(
@@ -190,22 +166,17 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     boxShadow: [
                       BoxShadow(
                         color: VAColors.primary.withValues(alpha: 0.26),
-                        blurRadius: 12,
-                        offset: const Offset(0, 5),
+                        blurRadius: 12, offset: const Offset(0, 5),
                       ),
                     ],
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.local_shipping_outlined,
-                          color: Colors.white, size: 18),
+                      Icon(Icons.local_shipping_outlined, color: Colors.white, size: 18),
                       SizedBox(width: 8),
                       Text('Suivre ma commande',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700)),
+                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
@@ -214,19 +185,15 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             const SizedBox(height: 10),
 
-            //  Retour accueil 
+            // Retour accueil
             GestureDetector(
-              onTap: () =>
-                  Navigator.of(context).popUntil((r) => r.isFirst),
+              onTap: () => Navigator.of(context).popUntil((r) => r.isFirst),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 6),
                 child: Text(
                   "Retour à l'accueil",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 13,
-                      color: VAColors.grey,
-                      fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 13, color: VAColors.grey, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -239,9 +206,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   }
 }
 
-// 
-//  ICÔNE SUCCÈS
-// 
+// ─── Icône succès ────────────────────────────────────────────────────────────
 
 class _SuccessIcon extends StatelessWidget {
   const _SuccessIcon();
@@ -265,20 +230,12 @@ class _SuccessIcon extends StatelessWidget {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFF43A047), Color(0xFF66BB6A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topLeft, end: Alignment.bottomRight,
               ),
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x3343A047),
-                  blurRadius: 18,
-                  offset: Offset(0, 6),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Color(0x3343A047), blurRadius: 18, offset: Offset(0, 6))],
             ),
-            child: const Icon(Icons.check_rounded,
-                color: Colors.white, size: 40),
+            child: const Icon(Icons.check_rounded, color: Colors.white, size: 40),
           ),
         ],
       ),
@@ -286,16 +243,13 @@ class _SuccessIcon extends StatelessWidget {
   }
 }
 
-// 
-//  CARTE CODE — dark premium, sans overflow
-// 
+// ─── Carte code ──────────────────────────────────────────────────────────────
 
 class _CodeCard extends StatelessWidget {
   final List<String> code;
   final bool copied;
   final VoidCallback onCopy;
-  const _CodeCard(
-      {required this.code, required this.copied, required this.onCopy});
+  const _CodeCard({required this.code, required this.copied, required this.onCopy});
 
   @override
   Widget build(BuildContext context) {
@@ -304,61 +258,37 @@ class _CodeCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF1C1C1E), Color(0xFF2A2A2E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.20),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.20), blurRadius: 24, offset: const Offset(0, 8))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-
-          // Label
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shield_outlined, size: 12,
-                  color: Colors.white.withValues(alpha: 0.45)),
+              Icon(Icons.shield_outlined, size: 12, color: Colors.white.withValues(alpha: 0.45)),
               const SizedBox(width: 6),
               Text('CODE DE LIVRAISON',
-                  style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.4,
-                      color: Colors.white.withValues(alpha: 0.45))),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
+                      letterSpacing: 1.4, color: Colors.white.withValues(alpha: 0.45))),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Chiffres — utilise LayoutBuilder pour éviter l'overflow
           LayoutBuilder(builder: (_, constraints) {
-            // Taille adaptée à la largeur disponible
-            final tileW = ((constraints.maxWidth - 24) / 4 - 8)
-                .clamp(44.0, 64.0);
+            final tileW = ((constraints.maxWidth - 24) / 4 - 8).clamp(44.0, 64.0);
             final tileH = tileW * 1.18;
             final fontSize = tileW * 0.58;
-
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 for (int i = 0; i < code.length; i++) ...[
-                  _DigitTile(
-                      digit: code[i],
-                      width: tileW,
-                      height: tileH,
-                      fontSize: fontSize),
+                  _DigitTile(digit: code[i], width: tileW, height: tileH, fontSize: fontSize),
                   if (i == 1) ...[
                     const SizedBox(width: 4),
-                    Container(
-                        width: 8, height: 2,
+                    Container(width: 8, height: 2,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(1),
@@ -370,64 +300,39 @@ class _CodeCard extends StatelessWidget {
               ],
             );
           }),
-
           const SizedBox(height: 16),
-
-          // Validité + copier
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                      width: 6, height: 6,
-                      decoration: const BoxDecoration(
-                          color: VAColors.green, shape: BoxShape.circle)),
-                  const SizedBox(width: 6),
-                  Text('Valable 24h',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.60),
-                          fontWeight: FontWeight.w500)),
-                ],
-              ),
+              Row(children: [
+                Container(width: 6, height: 6,
+                    decoration: const BoxDecoration(color: VAColors.green, shape: BoxShape.circle)),
+                const SizedBox(width: 6),
+                Text('Valable 24h',
+                    style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.60),
+                        fontWeight: FontWeight.w500)),
+              ]),
               GestureDetector(
                 onTap: onCopy,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: copied
-                        ? VAColors.green.withValues(alpha: 0.18)
-                        : Colors.white.withValues(alpha: 0.10),
+                    color: copied ? VAColors.green.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: copied
-                          ? VAColors.green.withValues(alpha: 0.35)
-                          : Colors.white.withValues(alpha: 0.14),
+                      color: copied ? VAColors.green.withValues(alpha: 0.35) : Colors.white.withValues(alpha: 0.14),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        copied ? Icons.check_rounded : Icons.copy_rounded,
-                        size: 12,
-                        color: copied
-                            ? VAColors.green
-                            : Colors.white.withValues(alpha: 0.75),
-                      ),
+                      Icon(copied ? Icons.check_rounded : Icons.copy_rounded, size: 12,
+                          color: copied ? VAColors.green : Colors.white.withValues(alpha: 0.75)),
                       const SizedBox(width: 5),
-                      Text(
-                        copied ? 'Copié !': 'Copier',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: copied
-                                ? VAColors.green
-                                : Colors.white.withValues(alpha: 0.75)),
-                      ),
+                      Text(copied ? 'Copié !' : 'Copier',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                              color: copied ? VAColors.green : Colors.white.withValues(alpha: 0.75))),
                     ],
                   ),
                 ),
@@ -443,46 +348,29 @@ class _CodeCard extends StatelessWidget {
 class _DigitTile extends StatelessWidget {
   final String digit;
   final double width, height, fontSize;
-  const _DigitTile({
-    required this.digit,
-    required this.width,
-    required this.height,
-    required this.fontSize,
-  });
+  const _DigitTile({required this.digit, required this.width, required this.height, required this.fontSize});
 
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
+        width: width, height: height,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: Colors.white.withValues(alpha: 0.11), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.11), width: 1),
         ),
         child: Center(
-          child: Text(
-            digit,
-            style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: fontSize,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                height: 1),
-          ),
+          child: Text(digit,
+            style: TextStyle(fontFamily: 'Poppins', fontSize: fontSize,
+                fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
         ),
       );
 }
 
-// 
-//  RÉCAP COMMANDE
-// 
+// ─── Récap commande ──────────────────────────────────────────────────────────
 
 class _RecapCard extends StatelessWidget {
-  final String commandeId;
-  final double totalPaye;
-  const _RecapCard(
-      {required this.commandeId, required this.totalPaye});
+  final Order order;
+  const _RecapCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -491,24 +379,14 @@ class _RecapCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 3))],
       ),
       child: Row(
         children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(
-              color: VAColors.primaryLight,
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: const Icon(Icons.receipt_outlined,
-                size: 18, color: VAColors.primaryDark),
+            decoration: BoxDecoration(color: VAColors.primaryLight, borderRadius: BorderRadius.circular(11)),
+            child: const Icon(Icons.receipt_outlined, size: 18, color: VAColors.primaryDark),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -516,15 +394,9 @@ class _RecapCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Commande',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: VAColors.grey,
-                        fontWeight: FontWeight.w500)),
-                Text('#$commandeId',
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: VAColors.black)),
+                    style: TextStyle(fontSize: 11, color: VAColors.grey, fontWeight: FontWeight.w500)),
+                Text('#${order.shortRef}',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: VAColors.black)),
               ],
             ),
           ),
@@ -532,16 +404,10 @@ class _RecapCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               const Text('Total payé',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: VAColors.grey,
-                      fontWeight: FontWeight.w500)),
-              Text('${totalPaye.toInt()} F',
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: VAColors.black)),
+                  style: TextStyle(fontSize: 11, color: VAColors.grey, fontWeight: FontWeight.w500)),
+              Text(order.formattedTotal,
+                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 15,
+                      fontWeight: FontWeight.w800, color: VAColors.black)),
             ],
           ),
         ],

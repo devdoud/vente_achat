@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:achat_vente/features/router/router.dart';
 import '../../theme/va_theme.dart';
-import '../transaction/vendre_form_screen.dart';
 import 'creation_widgets.dart';
 
 @RoutePage()
@@ -178,9 +178,7 @@ class _CreationAnnoncePhotosScreenState
       ),
       bottomNavigationBar: CreationBottomBar(
         onBack: () => Navigator.of(context).pop(),
-        onNext: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const VendreFormScreen()),
-        ),
+        onNext: () => context.router.push(VendreFormRoute(photos: _photos)),
         canContinue: _photos.isNotEmpty,
       ),
     );

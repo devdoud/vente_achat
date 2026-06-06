@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 abstract final class VAColors {
-  static const Color primary = Color(0xFFFFA726);
-  static const Color primaryLight = Color(0xFFFFE0B2);
-  static const Color primaryDark = Color(0xFFF57C00);
+  static const Color primary = Color(0xFFFFC146);
+  static const Color primaryLight = Color(0xFFFFF8E1);
+  static const Color primaryDark = Color(0xFFE6A800);
   static const Color background = Color(0xFFFAF8F5);
   static const Color surface = Colors.white;
   static const Color black = Color(0xFF1A1A1A);

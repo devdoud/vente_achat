@@ -86,7 +86,7 @@ class _CoverAppBar extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [VAColors.primary, VAColors.primaryDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            color: VAColors.primary,
           ),
           child: CustomPaint(painter: _CheckerboardPainter()),
         ),

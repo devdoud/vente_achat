@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import '../../theme/va_theme.dart';
+import '../../utils/cat_helpers.dart';
 import '../../widgets/export.dart';
 import '../../../domain/export.dart';
 
@@ -200,7 +201,7 @@ class _BottomCard extends StatelessWidget {
               Container(
                 width: 64, height: 64,
                 decoration: BoxDecoration(color: const Color(0xFFE3F2FD), borderRadius: BorderRadius.circular(VARadius.md)),
-                child: Center(child: Text(annonce.categorie.emoji, style: const TextStyle(fontSize: 30))),
+                child: Center(child: Icon(catIcon(annonce.categorie), size: 30, color: catIconColor(annonce.categorie))),
               ),
               const SizedBox(width: 12),
               Expanded(

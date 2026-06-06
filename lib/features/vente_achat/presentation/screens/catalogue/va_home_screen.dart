@@ -1,38 +1,23 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../core/injection/injection.dart';
 import '../../theme/va_theme.dart';
+import '../../utils/cat_helpers.dart';
 import '../../../domain/export.dart';
+import '../../../data/mappers/product_mapper.dart';
+import '../../../logic/export.dart';
 import 'annonce_detail_screen.dart';
 import 'annonces_feed_screen.dart';
 import 'search_screen.dart';
 import '../compte/filtres_screen.dart';
+import '../compte/profil_screen.dart';
+import '../transaction/cart_screen.dart';
 
-//  Données statiques 
-
-class _Cat {
-  final String emoji;
-  final String label;
-  final Color bg;
-  final AnnonceCategorie cat;
-  const _Cat(this.emoji, this.label, this.bg, this.cat);
-}
-
-const _cats = [
-  _Cat('', 'Téléphones', Color(0xFFD6EBFF), AnnonceCategorie.telephones),
-  _Cat('', 'Mode',       Color(0xFFFFDDE9), AnnonceCategorie.mode),
-  _Cat('', 'Maison',     Color(0xFFD9F2DD), AnnonceCategorie.maison),
-  _Cat('', 'Auto',       Color(0xFFFFF0C2), AnnonceCategorie.auto),
-  _Cat('', 'Beauté',     Color(0xFFF0DCF9), AnnonceCategorie.beaute),
-  _Cat('',  'High-tech', Color(0xFFD4F0FC), AnnonceCategorie.hightech),
-  _Cat('', 'Sport',      Color(0xFFD6F5E3), AnnonceCategorie.sport),
-  _Cat('', 'Livres',     Color(0xFFFFEBCC), AnnonceCategorie.livres),
-];
-
-
-// Cycle de hauteurs d'images pour l'effet staggeré
 const _imgH = [146.0, 108.0, 128.0, 116.0, 142.0, 104.0, 134.0, 118.0];
 
-//  Écran principal 
+// ─── Écran principal ─────────────────────────────────────────────────────────
 
 @RoutePage()
 class VAHomeScreen extends StatelessWidget {
@@ -40,40 +25,117 @@ class VAHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final all = AnnoncesMock.all;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverSafeArea(
-            bottom: false,
-            sliver: SliverToBoxAdapter(child: _Header()),
-          ),
-          SliverToBoxAdapter(child: _SearchBar()),
-          SliverToBoxAdapter(child: _CategoriesSection()),
-          SliverToBoxAdapter(child: _TrustStrip()),
-          SliverToBoxAdapter(child: _SpotlightSection(annonces: all)),
-          SliverToBoxAdapter(child: _InfiniteMasonryFeed(annonces: all)),
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
-        ],
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<ProductCubit>()..loadProducts()),
+        BlocProvider(create: (_) => getIt<CategoryCubit>()..load()),
+      ],
+      child: const _HomeBody(),
     );
   }
 }
 
-// 
-//  HEADER
-// 
+class _HomeBody extends StatelessWidget {
+  const _HomeBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CategoryCubit, CategoryState>(
+      builder: (ctx, catState) {
+        final catMap = catState is CategoryLoaded
+            ? buildCategoryMap(catState.categories)
+            : <String, AnnonceCategorie>{};
+
+        return BlocBuilder<ProductCubit, ProductState>(
+          builder: (ctx, productState) {
+            final List<Annonce> annonces;
+            final bool isLoading;
+
+            if (productState is ProductLoaded) {
+              annonces = productState.products
+                  .map((p) => productToAnnonce(p, catMap: catMap))
+                  .toList();
+              isLoading = false;
+            } else if (productState is ProductLoading) {
+              annonces = [];
+              isLoading = true;
+            } else {
+              annonces = [];
+              isLoading = false;
+            }
+
+            final apiCategories = catState is CategoryLoaded
+                ? catState.categories
+                : <Category>[];
+
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: RefreshIndicator(
+                color: VAColors.primary,
+                onRefresh: () async {
+                  ctx.read<ProductCubit>().loadProducts();
+                  ctx.read<CategoryCubit>().load();
+                  // Attendre que l'état passe en loading puis en loaded
+                  await Future.delayed(const Duration(milliseconds: 800));
+                },
+                child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
+                slivers: [
+                  SliverSafeArea(
+                    bottom: false,
+                    sliver: SliverToBoxAdapter(child: _Header(isLoading: isLoading)),
+                  ),
+                  const SliverToBoxAdapter(child: _SearchBar()),
+                  SliverToBoxAdapter(
+                    child: _CategoriesSection(
+                      categories: apiCategories,
+                      catMap: catMap,
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: _TrustStrip()),
+                  if (isLoading)
+                    const SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(color: VAColors.primary, strokeWidth: 2),
+                            SizedBox(height: 16),
+                            Text('Chargement des annonces...',
+                                style: VATextStyles.caption),
+                          ],
+                        ),
+                      ),
+                    )
+                  else ...[
+                    SliverToBoxAdapter(child: _SpotlightSection(annonces: annonces)),
+                    SliverToBoxAdapter(child: _InfiniteMasonryFeed(annonces: annonces)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                  ],
+                ],
+              ),
+              ), // CustomScrollView
+            );  // Scaffold
+          },
+        );
+      },
+    );
+  }
+}
+
+// ─── HEADER ──────────────────────────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
+  final bool isLoading;
+  const _Header({required this.isLoading});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
       child: Row(
         children: [
-          // Titre direct, sans logo
           const Text(
             'Vente & Achat',
             style: TextStyle(
@@ -84,9 +146,87 @@ class _Header extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // Chip localisation — l'élément utile côté droit
-          _LocationChip(),
+          if (isLoading)
+            const SizedBox(
+              width: 16, height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: VAColors.primary),
+            )
+          else ...[
+            _UserIconButton(),
+            const SizedBox(width: 6),
+            _CartIconButton(),
+            const SizedBox(width: 8),
+            _LocationChip(),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _CartIconButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CartCubit, CartState>(
+      builder: (ctx, state) {
+        final count = state is CartLoaded ? state.cart.itemCount : 0;
+        return GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CartScreen()),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 38, height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(19),
+                  boxShadow: const [BoxShadow(
+                      color: Color(0x10000000), blurRadius: 8, offset: Offset(0, 2))],
+                ),
+                child: const Icon(Icons.shopping_cart_outlined,
+                    size: 19, color: VAColors.black),
+              ),
+              if (count > 0)
+                Positioned(
+                  top: -3, right: -3,
+                  child: Container(
+                    width: 17, height: 17,
+                    decoration: const BoxDecoration(
+                        color: VAColors.primary, shape: BoxShape.circle),
+                    child: Center(
+                      child: Text('$count',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _UserIconButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ProfilScreen()),
+      ),
+      child: Container(
+        width: 38, height: 38,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(19),
+          boxShadow: const [BoxShadow(
+              color: Color(0x10000000), blurRadius: 8, offset: Offset(0, 2))],
+        ),
+        child: const Icon(Icons.person_outline_rounded,
+            size: 20, color: VAColors.black),
       ),
     );
   }
@@ -98,23 +238,18 @@ class _LocationChip extends StatelessWidget {
     return GestureDetector(
       onTap: () {},
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
           boxShadow: const [BoxShadow(color: Color(0x10000000), blurRadius: 8, offset: Offset(0, 2))],
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.location_on_rounded, color: VAColors.primary, size: 14),
-            const SizedBox(width: 4),
-            const Text(
-              'Cotonou',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: VAColors.black),
-            ),
-            const SizedBox(width: 3),
-            const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: VAColors.grey),
+            Icon(Icons.location_on_rounded, color: VAColors.primary, size: 16),
+            SizedBox(width: 2),
+            Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: VAColors.grey),
           ],
         ),
       ),
@@ -122,12 +257,11 @@ class _LocationChip extends StatelessWidget {
   }
 }
 
-
-// 
-//  SEARCH
-// 
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
 
 class _SearchBar extends StatelessWidget {
+  const _SearchBar();
+
   void _openSearch(BuildContext context) => Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => const SearchScreen(),
@@ -157,7 +291,6 @@ class _SearchBar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Zone de recherche (tap → SearchScreen)
             Expanded(
               child: GestureDetector(
                 onTap: () => _openSearch(context),
@@ -173,7 +306,6 @@ class _SearchBar extends StatelessWidget {
                 ),
               ),
             ),
-            // Bouton filtre (tap → FiltresScreen)
             GestureDetector(
               onTap: () => _openFilters(context),
               child: Container(
@@ -191,11 +323,11 @@ class _SearchBar extends StatelessWidget {
       );
 }
 
-// 
-//  TRUST STRIP (une ligne)
-// 
+// ─── TRUST STRIP ──────────────────────────────────────────────────────────────
 
 class _TrustStrip extends StatelessWidget {
+  const _TrustStrip();
+
   static const _items = [
     (Icons.verified_user_outlined,  'Paiement sécurisé'),
     (Icons.local_shipping_outlined, 'Livraison incluse'),
@@ -220,13 +352,9 @@ class _TrustStrip extends StatelessWidget {
               Icon(e.$1, size: 12, color: VAColors.primaryDark),
               const SizedBox(width: 4),
               Flexible(
-                child: Text(
-                  e.$2,
-                  style: const TextStyle(
-                      fontSize: 10, fontWeight: FontWeight.w600, color: VAColors.primaryDark),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: Text(e.$2,
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: VAColors.primaryDark),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -236,9 +364,7 @@ class _TrustStrip extends StatelessWidget {
   }
 }
 
-// 
-//  SPOTLIGHT — carrousel horizontal avec gradient overlay
-// 
+// ─── SPOTLIGHT ────────────────────────────────────────────────────────────────
 
 class _SpotlightSection extends StatelessWidget {
   final List<Annonce> annonces;
@@ -254,9 +380,8 @@ class _SpotlightSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
           child: Row(
             children: [
-              const Text('À ne pas rater ',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w900, color: VAColors.black, letterSpacing: -0.3)),
+              const Text('À ne pas rater',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: VAColors.black, letterSpacing: -0.3)),
               const Spacer(),
               GestureDetector(
                 onTap: () {},
@@ -297,7 +422,6 @@ class _SpotlightCard extends StatefulWidget {
 
 class _SpotlightCardState extends State<_SpotlightCard> {
   bool _fav = false;
-
   Color get _bg => _catColor(widget.annonce.categorie);
 
   @override
@@ -314,15 +438,8 @@ class _SpotlightCardState extends State<_SpotlightCard> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Fond coloré + emoji
-            Container(
-              color: _bg,
-              child: Center(
-                child: Text(widget.annonce.categorie.emoji,
-                    style: const TextStyle(fontSize: 56)),
-              ),
-            ),
-            // Gradient du bas
+            // Image réelle si disponible, sinon placeholder coloré
+            _buildSpotlightImage(widget.annonce, _bg),
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -335,91 +452,54 @@ class _SpotlightCardState extends State<_SpotlightCard> {
                 ),
               ),
             ),
-            // Badge remise
             if (widget.annonce.remisePourcent != null)
-              Positioned(
-                top: 9,
-                left: 9,
+              Positioned(top: 9, left: 9,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: VAColors.red, borderRadius: BorderRadius.circular(20)),
-                  child: Text(
-                    '-${widget.annonce.remisePourcent}%',
-                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
-                  ),
-                ),
-              )
+                  child: Text('-${widget.annonce.remisePourcent}%',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+                ))
             else if (widget.annonce.isPro)
-              Positioned(
-                top: 9,
-                left: 9,
+              Positioned(top: 9, left: 9,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: VAColors.primary, borderRadius: BorderRadius.circular(20)),
-                  child: const Text('Pro',
-                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
-                ),
-              ),
-            // Favori
-            Positioned(
-              top: 7,
-              right: 7,
+                  child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                )),
+            Positioned(top: 7, right: 7,
               child: GestureDetector(
                 onTap: () => setState(() => _fav = !_fav),
                 child: Container(
-                  width: 28,
-                  height: 28,
+                  width: 28, height: 28,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _fav ? Icons.favorite : Icons.favorite_border,
-                    size: 15,
-                    color: _fav ? VAColors.red : VAColors.grey,
-                  ),
+                    color: Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle),
+                  child: Icon(_fav ? Icons.favorite : Icons.favorite_border,
+                      size: 15, color: _fav ? VAColors.red : VAColors.grey),
                 ),
-              ),
-            ),
-            // Titre + prix en bas
+              )),
             Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
+              bottom: 0, left: 0, right: 0,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      widget.annonce.titre,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, height: 1.25),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Text(widget.annonce.titre,
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, height: 1.25),
+                        maxLines: 2, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Text(
-                          widget.annonce.prixFormate,
-                          style: const TextStyle(
-                              color: VAColors.primary, fontSize: 13, fontWeight: FontWeight.w800),
-                        ),
-                        const Spacer(),
-                        const Icon(Icons.location_on_outlined, size: 10, color: Colors.white54),
-                        const SizedBox(width: 2),
-                        Flexible(
-                          child: Text(
-                            widget.annonce.localisation,
-                            style: const TextStyle(color: Colors.white54, fontSize: 9),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    Row(children: [
+                      Text(widget.annonce.prixFormate,
+                          style: const TextStyle(color: VAColors.primary, fontSize: 13, fontWeight: FontWeight.w800)),
+                      const Spacer(),
+                      const Icon(Icons.location_on_outlined, size: 10, color: Colors.white54),
+                      const SizedBox(width: 2),
+                      Flexible(child: Text(widget.annonce.localisation,
+                          style: const TextStyle(color: Colors.white54, fontSize: 9),
+                          maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    ]),
                   ],
                 ),
               ),
@@ -431,11 +511,17 @@ class _SpotlightCardState extends State<_SpotlightCard> {
   }
 }
 
-// 
-//  CATEGORIES — scroll horizontal premium
-// 
+// ─── CATEGORIES ───────────────────────────────────────────────────────────────
 
 class _CategoriesSection extends StatelessWidget {
+  final List<Category> categories;
+  final Map<String, AnnonceCategorie> catMap;
+
+  const _CategoriesSection({
+    required this.categories,
+    required this.catMap,
+  });
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -445,7 +531,7 @@ class _CategoriesSection extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         children: [
-          //  Chip "Tout" actif (orange) — pas de navigation, déjà sur l'écran principal
+          // Chip "Tout"
           GestureDetector(
             onTap: () {},
             child: Container(
@@ -454,202 +540,225 @@ class _CategoriesSection extends StatelessWidget {
               decoration: BoxDecoration(
                 color: VAColors.primary,
                 borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: VAColors.primary.withValues(alpha: 0.38),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                boxShadow: [BoxShadow(
+                  color: VAColors.primary.withValues(alpha: 0.38),
+                  blurRadius: 8, offset: const Offset(0, 3),
+                )],
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.apps_rounded, color: Colors.white, size: 15),
                   SizedBox(width: 6),
-                  Text('Tout',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                  Text('Tout', style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
                 ],
               ),
             ),
           ),
 
-          //  Chips catégories 
-          for (final c in _cats)
-            GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => AnnoncesFeedScreen(categorie: c.cat)),
-              ),
-              child: Container(
+          // Catégories réelles de l'API
+          if (categories.isNotEmpty)
+            for (final cat in categories)
+              _CategoryChip(
+                category:   cat,
+                annonceCat: catMap[cat.uuid] ?? AnnonceCategorie.telephones,
+              )
+          else
+            // Fallback : skeleton chips gris pendant le chargement
+            for (int i = 0; i < 5; i++)
+              Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.only(left: 5, right: 13, top: 4, bottom: 4),
+                width: 90, height: 30,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: VAColors.greyLight,
                   borderRadius: BorderRadius.circular(22),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x12000000), blurRadius: 6, offset: Offset(0, 2)),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Cercle coloré avec emoji
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(color: c.bg, shape: BoxShape.circle),
-                      child: Center(
-                        child: Text(c.emoji, style: const TextStyle(fontSize: 14)),
-                      ),
-                    ),
-                    const SizedBox(width: 7),
-                    Text(
-                      c.label,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w600, color: VAColors.black),
-                    ),
-                  ],
                 ),
               ),
-            ),
         ],
       ),
     );
   }
 }
 
+class _CategoryChip extends StatelessWidget {
+  final Category         category;
+  final AnnonceCategorie annonceCat;
 
+  const _CategoryChip({required this.category, required this.annonceCat});
 
-// 
-//  MASONRY INFINI — 8 sections thématiques × 6 produits
-// 
+  @override
+  Widget build(BuildContext context) {
+    final bg         = catBg(annonceCat);
+    final iconColor  = catIconColor(annonceCat);
+    final apiIcon    = category.icon;
+    final isUrl      = apiIcon != null &&
+        (apiIcon.startsWith('http://') || apiIcon.startsWith('https://'));
 
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AnnoncesFeedScreen(categorie: annonceCat),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.only(left: 5, right: 13, top: 4, bottom: 4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: const [
+            BoxShadow(color: Color(0x12000000), blurRadius: 6, offset: Offset(0, 2))
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 28, height: 28,
+              decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+              clipBehavior: Clip.hardEdge,
+              child: isUrl
+                  ? CachedNetworkImage(
+                      imageUrl: apiIcon,
+                      width: 28, height: 28,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Icon(
+                          catIcon(annonceCat), size: 14, color: iconColor),
+                      errorWidget: (_, __, ___) => Icon(
+                          catIcon(annonceCat), size: 14, color: iconColor),
+                    )
+                  : Center(
+                      child: Icon(catIcon(annonceCat), size: 14, color: iconColor),
+                    ),
+            ),
+            const SizedBox(width: 7),
+            Text(
+              category.name,
+              style: const TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: VAColors.black),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── MASONRY INFINI ───────────────────────────────────────────────────────────
+
+/// Feed multi-sections : chaque produit apparaît une seule fois,
+/// réparti en sections thématiques avec titres captivants fixes.
 class _InfiniteMasonryFeed extends StatelessWidget {
   final List<Annonce> annonces;
   const _InfiniteMasonryFeed({required this.annonces});
 
-  List<Annonce> _pick({List<AnnonceCategorie>? cats, double? maxPrix,
-      bool proOnly = false, bool remiseOnly = false, bool recentFirst = false}) {
-    var r = annonces.where((a) {
-      if (cats != null && !cats.contains(a.categorie)) return false;
-      if (maxPrix != null && a.prix > maxPrix) return false;
-      if (proOnly && !a.isPro) return false;
-      if (remiseOnly && a.ancienPrix == null) return false;
-      return true;
-    }).toList();
-    if (recentFirst) r.sort((a, b) => b.datePublication.compareTo(a.datePublication));
-    if (r.isEmpty) r = annonces;
-    return List.generate(6, (i) => r[i % r.length]);
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (annonces.isEmpty) return const SizedBox.shrink();
+
+    // ── Titre principal : dérivé du PREMIER produit uniquement (ne grandit pas)
+    final firstWord = annonces.first.titre.split(' ').first;
+    final mainTitle = '$firstWord & bien plus';
+
+    // ── Sections thématiques (chaque produit dans 1 seule section)
+    final sorted  = List<Annonce>.from(annonces);
+    final byPrice = List<Annonce>.from(annonces)
+      ..sort((a, b) => a.prix.compareTo(b.prix));
+    final byRecent = List<Annonce>.from(annonces)
+      ..sort((a, b) => b.datePublication.compareTo(a.datePublication));
+
+    // Section 1 : présentation (tous les produits dans l'ordre API)
+    // Section 2 : les 6 moins chers (différents produits mis en avant)
+    // Section 3 : les plus récents (différents produits)
     final sections = [
-      (icon: '', title: 'Téléphones & Tech',    items: _pick(cats: [AnnonceCategorie.telephones, AnnonceCategorie.hightech])),
-      (icon: '', title: 'Petits prix du moment', items: _pick(maxPrix: 150000)),
-      (icon: '', title: 'Mode & Style',           items: _pick(cats: [AnnonceCategorie.mode, AnnonceCategorie.beaute])),
-      (icon: '⭐', title: 'Bonnes affaires',        items: _pick(remiseOnly: true)),
-      (icon: '', title: 'Maison & Auto',          items: _pick(cats: [AnnonceCategorie.maison, AnnonceCategorie.auto])),
-      (icon: '', title: 'Derniers arrivages',     items: _pick(recentFirst: true)),
-      (icon: '', title: 'Vendeurs certifiés',     items: _pick(proOnly: true)),
-      (icon: '', title: 'Sport & Loisirs',        items: _pick(cats: [AnnonceCategorie.sport, AnnonceCategorie.livres])),
+      (title: mainTitle,              sub: 'Notre sélection du moment',  items: sorted),
+      (title: 'Les petits prix',       sub: 'Le meilleur rapport qualité-prix', items: byPrice),
+      (title: 'Derniers arrivages',    sub: 'Tout juste ajoutés',              items: byRecent),
     ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         for (int s = 0; s < sections.length; s++) ...[
-          _SectionTitle(icon: sections[s].icon, title: sections[s].title),
-          _StaggeredGrid(annonces: sections[s].items, sectionIdx: s),
+          _SectionHeader(
+            title: sections[s].title,
+            sub:   sections[s].sub,
+            topPadding: s == 0 ? 16.0 : 28.0,
+          ),
+          _MasonryBlock(annonces: sections[s].items),
         ],
       ],
     );
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String icon;
-  final String title;
-  const _SectionTitle({required this.icon, required this.title});
+class _SectionHeader extends StatelessWidget {
+  final String title, sub;
+  final double topPadding;
+  const _SectionHeader({required this.title, required this.sub, this.topPadding = 28});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 26, 16, 8),
-      child: Row(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 7),
-          Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900,
-              color: VAColors.black, letterSpacing: -0.4)),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const AnnoncesFeedScreen())),
-            child: const Text('Tout voir',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: VAColors.primary)),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.fromLTRB(16, topPadding, 16, 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(title,
+                style: const TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.w900,
+                    color: VAColors.black, letterSpacing: -0.5, height: 1.15)),
+            const SizedBox(height: 2),
+            Text(sub, style: VATextStyles.caption),
+          ],
+        ),
+      );
 }
 
-class _StaggeredGrid extends StatelessWidget {
+class _MasonryBlock extends StatelessWidget {
   final List<Annonce> annonces;
-  final int sectionIdx;
-  const _StaggeredGrid({required this.annonces, required this.sectionIdx});
+  const _MasonryBlock({required this.annonces});
 
   @override
   Widget build(BuildContext context) {
-    final items = List.generate(6, (i) {
-      final ann = annonces[(i + sectionIdx * 2) % annonces.length];
-      final hIdx = (i + sectionIdx * 3) % _imgH.length;
-      return (ann, _imgH[hIdx]);
-    });
-
     final left  = <(Annonce, double)>[];
     final right = <(Annonce, double)>[];
-    for (int i = 0; i < items.length; i++) {
-      if (i.isEven) left.add(items[i]); else right.add(items[i]);
+    for (int i = 0; i < annonces.length; i++) {
+      final h = _imgH[i % _imgH.length];
+      if (i.isEven) left.add((annonces[i], h));
+      else          right.add((annonces[i], h));
     }
-    final offset = sectionIdx.isEven ? 22.0 : 8.0;
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [for (int i = 0; i < left.length; i++)
-                _PinCard(annonce: left[i].$1, imgHeight: left[i].$2)],
-            ),
-          ),
+          Expanded(child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [for (final e in left) _PinCard(annonce: e.$1, imgHeight: e.$2)],
+          )),
           const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: offset),
-                for (int i = 0; i < right.length; i++)
-                  _PinCard(annonce: right[i].$1, imgHeight: right[i].$2),
-              ],
-            ),
-          ),
+          Expanded(child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 22),
+              for (final e in right) _PinCard(annonce: e.$1, imgHeight: e.$2),
+            ],
+          )),
         ],
       ),
     );
   }
 }
 
+
+
 class _PinCard extends StatefulWidget {
   final Annonce annonce;
   final double imgHeight;
   const _PinCard({required this.annonce, required this.imgHeight});
-
   @override
   State<_PinCard> createState() => _PinCardState();
 }
@@ -660,6 +769,7 @@ class _PinCardState extends State<_PinCard> {
   @override
   Widget build(BuildContext context) {
     final bg = _catColor(widget.annonce.categorie);
+
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => AnnonceDetailScreen(annonce: widget.annonce)),
@@ -676,54 +786,43 @@ class _PinCardState extends State<_PinCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Stack(
-              children: [
-                Container(
-                  height: widget.imgHeight,
-                  width: double.infinity,
-                  color: bg,
-                  child: Center(child: Text(widget.annonce.categorie.emoji,
-                      style: TextStyle(fontSize: widget.imgHeight * 0.28))),
-                ),
-                if (widget.annonce.remisePourcent != null)
-                  Positioned(top: 7, left: 7,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(color: VAColors.red, borderRadius: BorderRadius.circular(20)),
-                      child: Text('-${widget.annonce.remisePourcent}%',
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
-                    ))
-                else if (widget.annonce.isPro)
-                  Positioned(top: 7, left: 7,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(color: VAColors.primary, borderRadius: BorderRadius.circular(20)),
-                      child: const Text('Pro',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
-                    )),
-                Positioned(top: 6, right: 6,
-                  child: GestureDetector(
-                    onTap: () => setState(() => _fav = !_fav),
-                    child: Container(
-                      width: 27, height: 27,
-                      decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.92), shape: BoxShape.circle),
-                      child: Icon(_fav ? Icons.favorite : Icons.favorite_border,
-                          size: 14, color: _fav ? VAColors.red : VAColors.grey),
-                    ),
-                  )),
-                Positioned(bottom: 7, left: 7,
+            Stack(children: [
+              _buildProductImage(widget.annonce, widget.imgHeight, bg),
+              if (widget.annonce.remisePourcent != null)
+                Positioned(top: 7, left: 7,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.52),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(widget.annonce.prixFormate,
-                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(color: VAColors.red, borderRadius: BorderRadius.circular(20)),
+                    child: Text('-${widget.annonce.remisePourcent}%',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+                  ))
+              else if (widget.annonce.isPro)
+                Positioned(top: 7, left: 7,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(color: VAColors.primary, borderRadius: BorderRadius.circular(20)),
+                    child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
                   )),
-              ],
-            ),
+              Positioned(top: 6, right: 6,
+                child: GestureDetector(
+                  onTap: () => setState(() => _fav = !_fav),
+                  child: Container(
+                    width: 27, height: 27,
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.92), shape: BoxShape.circle),
+                    child: Icon(_fav ? Icons.favorite : Icons.favorite_border,
+                        size: 14, color: _fav ? VAColors.red : VAColors.grey),
+                  ))),
+              Positioned(bottom: 7, left: 7,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.52),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(widget.annonce.prixFormate,
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
+                )),
+            ]),
             Padding(
               padding: const EdgeInsets.fromLTRB(9, 7, 9, 9),
               child: Column(
@@ -754,8 +853,9 @@ class _PinCardState extends State<_PinCard> {
                     Container(
                       width: 16, height: 16,
                       decoration: BoxDecoration(color: bg.withValues(alpha: 0.8), shape: BoxShape.circle),
-                      child: Center(child: Text(widget.annonce.vendeur.initiales[0],
-                          style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: VAColors.greyText))),
+                      child: Center(child: Text(
+                        widget.annonce.vendeur.initiales.isNotEmpty ? widget.annonce.vendeur.initiales[0] : 'V',
+                        style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: VAColors.greyText))),
                     ),
                     const SizedBox(width: 4),
                     Expanded(child: Text(widget.annonce.vendeur.nom.split(' ').first,
@@ -777,9 +877,76 @@ class _PinCardState extends State<_PinCard> {
   }
 }
 
-// 
-//  UTILITAIRES
-// 
+// ─── UTILITAIRES ─────────────────────────────────────────────────────────────
+
+const _kBaseUrl = 'https://app.beninrestoo.com';
+
+/// Résout une URL image.
+/// L'API retourne maintenant des URLs complètes (https://...) directement.
+String? _resolveUrl(String? url) {
+  if (url == null || url.isEmpty) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('/')) return '$_kBaseUrl$url';
+  return null; // nom de fichier seul sans chemin → pas affichable
+}
+
+/// Image pour les cards Spotlight (cover full)
+Widget _buildSpotlightImage(Annonce annonce, Color bg) {
+  final url = _resolveUrl(annonce.photos.isNotEmpty ? annonce.photos.first : null);
+  if (url != null) {
+    return CachedNetworkImage(
+      imageUrl: url,
+      fit: BoxFit.cover,
+      placeholder: (_, __) => Container(color: bg),
+      errorWidget: (_, __, ___) => _iconPlaceholder(annonce.categorie, 195, bg, title: annonce.titre),
+    );
+  }
+  return _iconPlaceholder(annonce.categorie, 195, bg, title: annonce.titre);
+}
+
+/// Affiche la vraie image produit (absolue ou relative), sinon placeholder coloré.
+Widget _buildProductImage(Annonce annonce, double height, Color bg) {
+  final raw  = annonce.photos.isNotEmpty ? annonce.photos.first : null;
+  final url  = _resolveUrl(raw);
+
+  if (url != null) {
+    return CachedNetworkImage(
+      imageUrl: url,
+      height: height, width: double.infinity,
+      fit: BoxFit.cover,
+      fadeInDuration: Duration.zero,   // affichage instantané si en cache
+      fadeOutDuration: Duration.zero,
+      placeholder: (_, __) => Container(        // fond coloré simple pendant le chargement
+          height: height, color: bg),
+      errorWidget: (_, __, ___) => _iconPlaceholder(   // lettre seulement si erreur
+          annonce.categorie, height, bg, title: annonce.titre),
+    );
+  }
+  return _iconPlaceholder(annonce.categorie, height, bg, title: annonce.titre);
+}
+
+/// Placeholder avec initiale du titre — plus expressif qu'une icône générique.
+Widget _iconPlaceholder(AnnonceCategorie cat, double height, Color bg, {String? title}) {
+  final letter = (title?.isNotEmpty == true) ? title![0].toUpperCase() : '?';
+  final textColor = Color.fromRGBO(
+    (bg.r * 0.45).toInt(),
+    (bg.g * 0.45).toInt(),
+    (bg.b * 0.45).toInt(),
+    1,
+  );
+  return Container(
+    height: height, width: double.infinity, color: bg,
+    child: Center(
+      child: Text(letter,
+        style: TextStyle(
+          fontSize: height * 0.35,
+          fontWeight: FontWeight.w900,
+          color: textColor,
+        ),
+      ),
+    ),
+  );
+}
 
 Color _catColor(AnnonceCategorie cat) => switch (cat) {
       AnnonceCategorie.telephones => const Color(0xFFD6EBFF),
@@ -790,4 +957,15 @@ Color _catColor(AnnonceCategorie cat) => switch (cat) {
       AnnonceCategorie.beaute     => const Color(0xFFF0DCF9),
       AnnonceCategorie.sport      => const Color(0xFFD6F5E3),
       AnnonceCategorie.livres     => const Color(0xFFFFEBCC),
+    };
+
+IconData _catIcon(AnnonceCategorie cat) => switch (cat) {
+      AnnonceCategorie.telephones => Icons.phone_android_outlined,
+      AnnonceCategorie.mode       => Icons.checkroom_outlined,
+      AnnonceCategorie.maison     => Icons.home_outlined,
+      AnnonceCategorie.auto       => Icons.directions_car_outlined,
+      AnnonceCategorie.beaute     => Icons.face_outlined,
+      AnnonceCategorie.hightech   => Icons.computer_outlined,
+      AnnonceCategorie.sport      => Icons.sports_soccer_outlined,
+      AnnonceCategorie.livres     => Icons.menu_book_outlined,
     };

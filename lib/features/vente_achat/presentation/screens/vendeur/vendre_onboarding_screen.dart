@@ -379,7 +379,7 @@ class _StepReady extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFFF8C00), VAColors.primary, Color(0xFFFFB74D)],
+              colors: [VAColors.primaryDark, VAColors.primary, VAColors.primary],
             ),
           ),
         ),
@@ -489,7 +489,6 @@ class _StepReady extends StatelessWidget {
                 child: _PrimaryBtn(
                   label: 'Publier ma première annonce →',
                   onTap: onFinish,
-                  dark: true,
                 ),
               ),
               GestureDetector(
@@ -798,12 +797,10 @@ class _PrimaryBtn extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: dark
-              ? VAColors.cardBlack
-              : (enabled ? VAColors.primary : VAColors.greyBorder),
+          color: enabled ? VAColors.primary : VAColors.greyBorder,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: enabled && !dark
-              ? [BoxShadow(color: VAColors.primary.withValues(alpha: 0.35),
+          boxShadow: enabled
+              ? [BoxShadow(color: VAColors.primary.withValues(alpha: 0.32),
                   blurRadius: 12, offset: const Offset(0, 5))]
               : null,
         ),

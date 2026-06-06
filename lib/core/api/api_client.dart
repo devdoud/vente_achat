@@ -2,81 +2,95 @@ import 'dart:io';
 import 'package:dio/io.dart';
 import '../../export.dart';
 
-const baseUrl="";
-
-final dioOption= BaseOptions(
-    connectTimeout: const Duration(minutes: 1),
-    receiveTimeout: const Duration(minutes: 1),
-    headers: {
-      "accept": "application/ld+json",
-      "Content-Type": "application/ld+json",
-    },
-    baseUrl: baseUrl,
-);
+const _kBaseUrl = 'https://app.beninrestoo.com';
 
 @Singleton()
-class ApiClient{
-  ApiClient();
+class ApiClient {
+  final TokenStorage _tokenStorage;
+  late final Dio _dio;
+
+  ApiClient(this._tokenStorage) {
+    _dio = _buildDio();
+  }
+
   factory ApiClient.get() => getIt<ApiClient>();
 
-  Dio baseClient(){
-    final dio= Dio(dioOption);
+  Dio call() => _dio;
+
+  Dio _buildDio() {
+    final dio = Dio(BaseOptions(
+      baseUrl: _kBaseUrl,
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ));
 
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
-        final HttpClient client = HttpClient(context: SecurityContext());
+        final client = HttpClient(context: SecurityContext());
         client.badCertificateCallback = (cert, host, port) => true;
         return client;
       },
-      validateCertificate: (cert, host, port) {
-        if (cert == null) {
-          return false;
-        }
-        return true;
-      },
+      validateCertificate: (cert, host, port) => true,
     );
 
-    return dio..interceptors.addAll([InterceptorsWrapper(
-      onRequest: (options, handler) {
-        options.headers["platform"] = "mobile";
-        options.headers["system"] = Platform.operatingSystem;
-        options.headers["current-path"] = getIt<AppRouter>().currentPath;
-        return handler.next(options);
-      },
-    ), Logging(), AppInterceptors()]);
-  }
+    dio.interceptors.addAll([
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final token = _tokenStorage.token;
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          options.headers['platform'] = 'mobile';
+          options.headers['system'] = Platform.operatingSystem;
+          return handler.next(options);
+        },
+      ),
+      Logging(),
+      AppInterceptors(),
+    ]);
 
-  Dio call(){
-    return baseClient();
+    return dio;
   }
 }
 
 class Logging extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    AppLogger.get().logInfo('REQUEST[${options.method}] => PATH: ${options.uri.toString()} => HEADERS: ${options.headers}');
+    AppLogger.get().logInfo('REQUEST[${options.method}] => ${options.uri}');
     return super.onRequest(options, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    AppLogger.get().logInfo('RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.uri.toString()}');
-
+    AppLogger.get().logInfo('RESPONSE[${response.statusCode}] => ${response.requestOptions.uri}');
     return super.onResponse(response, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    String message= 'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.uri.toString()} => ERROR: ${err.message}';
-    AppLogger.get().logError(message, err.error, err.stackTrace);
-
+    Future.microtask(() {
+      try {
+        final body = err.response?.data;
+        AppLogger.get().logError(
+          'ERROR[${err.response?.statusCode}] '
+          'type=${err.type.name} '
+          'msg="${err.message}" '
+          '=> ${err.requestOptions.uri}'
+          '${body != null ? '\nRESPONSE_BODY: $body' : ''}',
+          err.error,
+          err.stackTrace,
+        );
+      } catch (_) {}
+    });
     return super.onError(err, handler);
   }
 }
 
 class AppInterceptors extends Interceptor {
-  AppInterceptors();
-
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     switch (err.type) {
@@ -94,80 +108,90 @@ class AppInterceptors extends Interceptor {
             throw NotFoundException(err.requestOptions);
           case 409:
             throw ConflictException(err.requestOptions);
+          case 422:
+            throw UnprocessableException(err.requestOptions, err.response?.data);
           case 500:
             throw InternalServerErrorException(err.requestOptions);
         }
-      case DioExceptionType.cancel:
-      case DioExceptionType.badCertificate:
-      case DioExceptionType.unknown:
-        break;
       case DioExceptionType.connectionError:
         throw NoInternetConnectionException(err.requestOptions);
+      default:
+        break;
     }
-
     return handler.next(err);
   }
 }
 
 class BadRequestException extends DioException {
   BadRequestException(RequestOptions r) : super(requestOptions: r);
-
   @override
-  String toString() {
-    return 'Invalid request';
-  }
+  String toString() => 'Requête invalide';
 }
 
 class InternalServerErrorException extends DioException {
   InternalServerErrorException(RequestOptions r) : super(requestOptions: r);
-
   @override
-  String toString() {
-    return 'Unknown error occurred, please try again later.';
-  }
+  String toString() => 'Erreur serveur, réessayez plus tard';
 }
 
 class ConflictException extends DioException {
   ConflictException(RequestOptions r) : super(requestOptions: r);
-
   @override
-  String toString() {
-    return 'Conflict occurred';
-  }
+  String toString() => 'Conflit détecté';
 }
 
 class UnauthorizedException extends DioException {
   UnauthorizedException(RequestOptions r) : super(requestOptions: r);
-
   @override
-  String toString() {
-    return 'Access denied';
-  }
+  String toString() => 'Accès non autorisé';
 }
 
 class NotFoundException extends DioException {
   NotFoundException(RequestOptions r) : super(requestOptions: r);
-
   @override
-  String toString() {
-    return 'The requested information could not be found';
-  }
+  String toString() => 'Ressource introuvable';
 }
 
 class NoInternetConnectionException extends DioException {
   NoInternetConnectionException(RequestOptions r) : super(requestOptions: r);
-
   @override
-  String toString() {
-    return 'No internet connection detected, please try again.';
-  }
+  String toString() => 'Aucune connexion internet';
 }
 
 class DeadlineExceededException extends DioException {
   DeadlineExceededException(RequestOptions r) : super(requestOptions: r);
+  @override
+  String toString() => 'La connexion a expiré';
+}
+
+class UnprocessableException extends DioException {
+  final dynamic responseData;
+  UnprocessableException(RequestOptions r, this.responseData) : super(requestOptions: r);
+
+  /// Extrait le message de validation depuis la réponse API Platform / Symfony.
+  String get validationMessage {
+    final data = responseData;
+    if (data is Map) {
+      // API Platform: { "detail": "field: message" }
+      if (data['detail'] is String && (data['detail'] as String).isNotEmpty) {
+        return data['detail'] as String;
+      }
+      // API Platform violations: { "violations": [{"message": "..."}] }
+      final violations = data['violations'];
+      if (violations is List && violations.isNotEmpty) {
+        final first = violations.first;
+        if (first is Map) {
+          final prop = first['propertyPath'] as String? ?? '';
+          final msg  = first['message']      as String? ?? '';
+          return prop.isNotEmpty ? '$prop : $msg' : msg;
+        }
+      }
+      // Symfony simple: { "message": "..." }
+      if (data['message'] is String) return data['message'] as String;
+    }
+    return 'Données invalides';
+  }
 
   @override
-  String toString() {
-    return 'The connection has timed out, please try again.';
-  }
+  String toString() => validationMessage;
 }

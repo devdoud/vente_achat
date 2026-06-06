@@ -10,7 +10,8 @@ export 'package:form_builder_validators/form_builder_validators.dart';
 export 'package:google_maps_flutter/google_maps_flutter.dart';
 
 export 'core/export.dart';
-export 'features/export.dart';
+// Hide conflicting symbol 'Order' exported from features to avoid ambiguity
+export 'features/export.dart' hide Order;
 
 extension Precision on double {
   double toPrecision(num fractionDigits) {
